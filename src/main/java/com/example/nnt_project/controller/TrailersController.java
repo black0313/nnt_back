@@ -23,6 +23,8 @@ public class TrailersController {
         if (trailers.isEmpty()) {
             return ResponseEntity.ok(new ApiResponse("Empty", false, null));
         }
+
+        
         return ResponseEntity.ok(new ApiResponse("Fetched all trailers", true, trailers));
     }
 

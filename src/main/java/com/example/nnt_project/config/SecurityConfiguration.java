@@ -44,6 +44,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/trailers/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/drivers/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/dispatchers/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")

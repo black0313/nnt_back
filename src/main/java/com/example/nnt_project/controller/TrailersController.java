@@ -24,7 +24,7 @@ public class TrailersController {
             return ResponseEntity.ok(new ApiResponse("Empty", false, null));
         }
 
-        
+
         return ResponseEntity.ok(new ApiResponse("Fetched all trailers", true, trailers));
     }
 

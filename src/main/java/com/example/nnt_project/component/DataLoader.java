@@ -57,16 +57,16 @@ public class DataLoader implements CommandLineRunner {
                 userRepository.save(dispatcher);
             }
 
-            if (userRepository.findByUsername("accountant").isEmpty()) {
-                User accountant = User.builder()
-                        .firstname("Account")
-                        .lastname("Accountov")
-                        .username("accountant")
-                        .password(passwordEncoder.encode("123"))
-                        .role(ACCOUNTANT)
-                        .build();
-                userRepository.save(accountant);
-            }
+//            if (userRepository.findByUsername("accountant").isEmpty()) {
+//                User accountant = User.builder()
+//                        .firstname("Account")
+//                        .lastname("Accountov")
+//                        .username("accountant")
+//                        .password(passwordEncoder.encode("123"))
+//                        .role(ACCOUNTANT)
+//                        .build();
+//                userRepository.save(accountant);
+//            }
         }
     }
 }

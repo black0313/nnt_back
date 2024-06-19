@@ -30,4 +30,15 @@ public class TrailersService {
     public List<Trailers> getAllTrailers() {
         return trailersRepository.findAll();
     }
+
+    public Optional<Trailers> updateTrailers(UUID id, Trailers updatedTrailers) {
+        return trailersRepository.findById(id).map(existingTrailers -> {
+            existingTrailers.setTrailerNumber(updatedTrailers.getTrailerNumber());
+            existingTrailers.setNumberOfLoads(updatedTrailers.getNumberOfLoads());
+            existingTrailers.setGrossRevenue(updatedTrailers.getGrossRevenue());
+            existingTrailers.setRevenuePerMile(updatedTrailers.getRevenuePerMile());
+            existingTrailers.setExpires(updatedTrailers.isExpires());
+            return trailersRepository.save(existingTrailers);
+        });
+    }
 }

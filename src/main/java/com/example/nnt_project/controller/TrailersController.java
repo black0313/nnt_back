@@ -44,4 +44,11 @@ public class TrailersController {
         trailersService.deleteTrailers(id);
         return ResponseEntity.ok(new ApiResponse("Trailers deleted successfully", true));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateTrailers(@PathVariable UUID id, @RequestBody Trailers updatedTrailers) {
+        return trailersService.updateTrailers(id, updatedTrailers)
+                .map(trailers -> ResponseEntity.ok(new ApiResponse("Trailers updated successfully", true, trailers)))
+                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Trailers not found", false)));
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.nnt_project.controller;
 
+import com.example.nnt_project.dto.DispatchersDto;
 import com.example.nnt_project.entity.Dispatchers;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.service.DispatchersService;
@@ -26,8 +27,11 @@ public class DispatchersController {
 
     @GetMapping
     public ResponseEntity<ApiResponse> getAllDispatchers() {
-        List<Dispatchers> dispatchersList = dispatchersService.getAllDispatchers();
-        return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchersList));
+        List<DispatchersDto> dispatchersList = dispatchersService.getAllDispatchers();
+        if (!dispatchersList.isEmpty()){
+            return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchersList));
+        }
+        return ResponseEntity.ok(new ApiResponse("Dispatchers not found", false));
     }
 
     @PostMapping

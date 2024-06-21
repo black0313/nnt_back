@@ -29,6 +29,5 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse("Authentication failed: Internal server error", false));
         }
-
     }
 }

@@ -32,11 +32,7 @@ public class TruckController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getTruckById(@PathVariable UUID id) {
         Optional<Truck> truck = truckService.getTruckById(id);
-        if (truck.isPresent()) {
-            return ResponseEntity.ok(new ApiResponse("Truck found", true, truck.get()));
-        } else {
-            return ResponseEntity.ok(new ApiResponse("Truck not found", false));
-        }
+        return truck.map(value -> ResponseEntity.ok(new ApiResponse("Truck found", true, value))).orElseGet(() -> ResponseEntity.ok(new ApiResponse("Truck not found", false)));
     }
 
     @PostMapping

@@ -32,20 +32,17 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/swagger-ui.html",
-                                "/webjars/**"
-                        ).permitAll()
-                        .requestMatchers("/api/trucks/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/v2/api-docs").permitAll()
                         .requestMatchers("/api/trailers/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/drivers/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/dispatchers/**").permitAll()
+                        .requestMatchers("/api/auth/authenticate/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/trucks/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/trucks/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/trucks/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/trucks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
@@ -73,6 +70,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -80,6 +78,13 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+
+
+        configuration.addAllowedOriginPattern("/swagger-ui/**");
+        configuration.addAllowedOriginPattern("/v3/api-docs/**");
+        configuration.addAllowedOriginPattern("/swagger-resources/**");
+        configuration.addAllowedOriginPattern("/swagger-ui.html");
+        configuration.addAllowedOriginPattern("/v2/api-docs");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

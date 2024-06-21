@@ -1,5 +1,6 @@
 package com.example.nnt_project.controller;
 
+import com.example.nnt_project.dto.DispatcherDTO;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.service.UserService;
 import com.example.nnt_project.user.User;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +29,18 @@ public class UserController {
     public ResponseEntity<ApiResponse> saveUser(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(new ApiResponse("User saved successfully", true, savedUser));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(new ApiResponse("Users retrieved successfully", true, users));
+    }
+
+    @GetMapping("/dispatchers")
+    public ResponseEntity<ApiResponse> getDispatchers() {
+        List<DispatcherDTO> dispatchers = userService.getDispatchers();
+        return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchers));
     }
 
     @DeleteMapping("/{id}")

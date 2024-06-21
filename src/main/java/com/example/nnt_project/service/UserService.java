@@ -1,20 +1,21 @@
 package com.example.nnt_project.service;
 
+import com.example.nnt_project.dto.DispatcherDTO;
 import com.example.nnt_project.repository.UserRepository;
 import com.example.nnt_project.user.User;
+import com.example.nnt_project.role.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    private static final Logger logger = Logger.getLogger(UserService.class.getName());
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -23,13 +24,15 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public User saveUser(User user) {
         if (user.getRole() == null) {
             throw new IllegalArgumentException("Role must not be null");
         }
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        logger.info("Saving user with role: " + user.getRole());
         return userRepository.save(user);
     }
 
@@ -44,8 +47,24 @@ public class UserService {
             existingUser.setUsername(updatedUser.getUsername());
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             existingUser.setRole(updatedUser.getRole());
-            logger.info("Updating user with role: " + updatedUser.getRole());
             return userRepository.save(existingUser);
         });
+    }
+
+    public List<DispatcherDTO> getDispatchers() {
+        return userRepository.findAll().stream()
+                .filter(user -> Role.DISPATCHER.equals(user.getRole()))
+                .map(this::convertToDispatcherDTO)
+                .collect(Collectors.toList());
+    }
+
+    private DispatcherDTO convertToDispatcherDTO(User user) {
+        return DispatcherDTO.builder()
+                .id(user.getId())
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .username(user.getUsername())
+                .role(user.getRole().name())
+                .build();
     }
 }

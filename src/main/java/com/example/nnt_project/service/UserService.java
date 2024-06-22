@@ -32,6 +32,9 @@ public class UserService {
         if (user.getRole() == null) {
             throw new IllegalArgumentException("Role must not be null");
         }
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -42,14 +45,23 @@ public class UserService {
 
     public Optional<User> updateUser(UUID id, User updatedUser) {
         return userRepository.findById(id).map(existingUser -> {
+            // Check if the new username is different and already exists
+            if (!existingUser.getUsername().equals(updatedUser.getUsername()) &&
+                    userRepository.findByUsername(updatedUser.getUsername()).isPresent()) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+
             existingUser.setFirstname(updatedUser.getFirstname());
             existingUser.setLastname(updatedUser.getLastname());
             existingUser.setUsername(updatedUser.getUsername());
-            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
             existingUser.setRole(updatedUser.getRole());
             return userRepository.save(existingUser);
         });
     }
+
 
     public List<DispatcherDTO> getDispatchers() {
         return userRepository.findAll().stream()

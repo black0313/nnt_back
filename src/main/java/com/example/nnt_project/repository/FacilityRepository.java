@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface FacilityRepository extends JpaRepository<Facility, UUID> {
     Optional<Facility> findByName(String name);
     List<Facility> findByNameContainingIgnoreCase(String name);
+
 }

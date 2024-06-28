@@ -27,8 +27,12 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> saveUser(@RequestBody User user) {
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(new ApiResponse("User saved successfully", true, savedUser));
+        try {
+            User savedUser = userService.saveUser(user);
+            return ResponseEntity.ok(new ApiResponse("User saved successfully", true, savedUser));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), false));
+        }
     }
 
     @GetMapping

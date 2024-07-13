@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,10 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Load {
-    @Id
-    @GeneratedValue
-    private UUID id;
+public class Load extends AbsEntity {
+
 
     private String internalLoadNumber;
     private String loadNumber;

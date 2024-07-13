@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,11 +17,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Facility {
+public class Facility extends AbsEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
 
     private String name;
 }

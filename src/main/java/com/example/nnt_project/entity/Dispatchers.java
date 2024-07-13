@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import com.example.nnt_project.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,17 +19,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Dispatchers {
+public class Dispatchers extends AbsEntity {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+    private String email;
+    private String phone;
+    private String firstname;
+    private String lastname;
 
-    private int numberOfLoads;
-    private double grossRevenue;
-    private double netProfit;
-    private int openLoads;
-    private String phoneNumber;
+    @OneToOne
+    private Address address;
 
     private UUID userId;
 }

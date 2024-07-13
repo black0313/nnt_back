@@ -3,6 +3,7 @@ package com.example.nnt_project.controller;
 import com.example.nnt_project.dto.DispatchersDto;
 import com.example.nnt_project.entity.Dispatchers;
 import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.DispatcherDTO;
 import com.example.nnt_project.service.DispatchersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +27,15 @@ public class DispatchersController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllDispatchers() {
-        List<DispatchersDto> dispatchersList = dispatchersService.getAllDispatchers();
-        if (!dispatchersList.isEmpty()){
-            return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchersList));
-        }
-        return ResponseEntity.ok(new ApiResponse("Dispatchers not found", false));
+    public ResponseEntity<?> getAllDispatchers() {
+        ApiResponse apiResponse = dispatchersService.getAllDispatchers();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 400).body(apiResponse);
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> saveDispatcher(@RequestBody Dispatchers dispatcher) {
-        Dispatchers savedDispatcher = dispatchersService.saveDispatcher(dispatcher);
-        return ResponseEntity.ok(new ApiResponse("Dispatcher saved successfully", true, savedDispatcher));
+    public ResponseEntity<?> create(@RequestBody DispatcherDTO dispatcherDTO) {
+        ApiResponse apiResponse = dispatchersService.saveDispatcher(dispatcherDTO);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -47,10 +45,9 @@ public class DispatchersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateDispatcher(@PathVariable UUID id, @RequestBody Dispatchers updatedDispatcher) {
-        return dispatchersService.updateDispatcher(id, updatedDispatcher)
-                .map(dispatcher -> ResponseEntity.ok(new ApiResponse("Dispatcher updated successfully", true, dispatcher)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Dispatcher not found", false)));
+    public ResponseEntity<?> updateDispatcher(@PathVariable UUID id, @RequestBody DispatcherDTO dispatcherDTO) {
+        ApiResponse apiResponse = dispatchersService.updateDispatcher(id, dispatcherDTO);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping("/dateRange")

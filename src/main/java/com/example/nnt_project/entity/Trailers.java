@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,10 +15,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Trailers {
-    @Id
-    @GeneratedValue
-    private UUID id;
+public class Trailers extends AbsEntity {
+
 
     private String trailerNumber;
     private int numberOfLoads;

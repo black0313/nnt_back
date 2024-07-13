@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -17,10 +18,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Consignee {
-    @Id
-    @GeneratedValue
-    private UUID id;
+public class Consignee extends AbsEntity {
+
 
     private String name;
     private String location;

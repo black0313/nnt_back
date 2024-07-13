@@ -81,11 +81,11 @@ public class DataLoader implements CommandLineRunner {
             //     userRepository.save(accountant);
             // }
 
-            if (brokerRepository.findByName("Amazon").isEmpty()) {
-                Broker amazon = Broker.builder()
-                        .name("Amazon")
-                        .build();
-                brokerRepository.save(amazon);
+//            if (brokerRepository.findByName("Amazon").isEmpty()) {
+//                Broker amazon = Broker.builder()
+//                        .name("Amazon")
+//                        .build();
+//                brokerRepository.save(amazon);
             }
 
 
@@ -184,4 +184,4 @@ public class DataLoader implements CommandLineRunner {
             }
         }
     }
-}
+

@@ -1,5 +1,6 @@
 package com.example.nnt_project.entity;
 
+import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,11 +15,8 @@ import java.util.UUID;
 @Entity(name = "file_data")
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileData {
+public class FileData extends AbsEntity {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
 
     private String fileName;
 

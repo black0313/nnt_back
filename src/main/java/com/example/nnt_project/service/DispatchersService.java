@@ -7,6 +7,7 @@ import com.example.nnt_project.payload.DispatcherDTO;
 import com.example.nnt_project.repository.AddressRepository;
 import com.example.nnt_project.repository.DispatchersRepository;
 import com.example.nnt_project.repository.UserRepository;
+import com.example.nnt_project.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +30,16 @@ public class DispatchersService {
         Dispatchers dispatchers = new Dispatchers();
         dispatchers.setPhone(dispatcherDTO.getPhone());
         dispatchers.setEmail(dispatcherDTO.getEmail());
-        dispatchers.setFirstname(dispatcherDTO.getFirstname());
-        dispatchers.setLastname(dispatcherDTO.getLastname());
         dispatchers.setUserId(dispatcherDTO.getUserId());
+
+        UUID userId = dispatcherDTO.getUserId();
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("User not found");
+        }
+        User user = optionalUser.get();
+        dispatchers.setFirstname(user.getFirstname());
+        dispatchers.setLastname(user.getLastname());
 
         Address address = new Address();
         address.setCity(dispatcherDTO.getCity());

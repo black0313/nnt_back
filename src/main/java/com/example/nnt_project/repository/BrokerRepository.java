@@ -9,5 +9,4 @@ import java.util.UUID;
 
 @Repository
 public interface BrokerRepository extends JpaRepository<Broker, UUID> {
-    Optional<Broker> findByName(String name);
 }

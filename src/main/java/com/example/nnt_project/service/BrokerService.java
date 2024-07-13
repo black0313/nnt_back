@@ -33,7 +33,7 @@ public class BrokerService {
 
     public Optional<Broker> updateBroker(UUID id, Broker updatedBroker) {
         return brokerRepository.findById(id).map(existingBroker -> {
-            existingBroker.setName(updatedBroker.getName());
+//            existingBroker.setName(updatedBroker.getName());
             return brokerRepository.save(existingBroker);
         });
     }

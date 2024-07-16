@@ -1,6 +1,9 @@
 package com.example.nnt_project.service;
 
 import com.example.nnt_project.entity.Trailers;
+import com.example.nnt_project.mapper.TrailersMapper;
+import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.TrailersDto;
 import com.example.nnt_project.repository.TrailersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,32 +16,39 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TrailersService {
 
+    private final TrailersMapper trailersMapper;
     private final TrailersRepository trailersRepository;
 
-    public Optional<Trailers> getTrailersById(UUID id) {
-        return trailersRepository.findById(id);
+    public ApiResponse getTrailersById(UUID id) {
+        Optional<Trailers> optionalTrailers = trailersRepository.findById(id);
+        return optionalTrailers.map(trailers -> new ApiResponse("found", true, trailersMapper.toTrailersDto(trailers))).orElseGet(() -> new ApiResponse("not found"));
     }
 
-    public Trailers saveTrailers(Trailers trailers) {
-        return trailersRepository.save(trailers);
+    public ApiResponse saveTrailers(TrailersDto trailersDto) {
+        trailersRepository.save(trailersMapper.toTrailers(trailersDto));
+        return new ApiResponse("Successfully saved trailers", true);
     }
 
     public void deleteTrailers(UUID id) {
         trailersRepository.deleteById(id);
     }
 
-    public List<Trailers> getAllTrailers() {
-        return trailersRepository.findAll();
+    public ApiResponse getAllTrailers() {
+        List<Trailers> all = trailersRepository.findAll();
+        if (all.isEmpty()) {
+            return new ApiResponse("not found", false);
+        }
+        return new ApiResponse("found", true, trailersMapper.toTrailersDto(all));
     }
 
-    public Optional<Trailers> updateTrailers(UUID id, Trailers updatedTrailers) {
-        return trailersRepository.findById(id).map(existingTrailers -> {
-            existingTrailers.setTrailerNumber(updatedTrailers.getTrailerNumber());
-            existingTrailers.setNumberOfLoads(updatedTrailers.getNumberOfLoads());
-            existingTrailers.setGrossRevenue(updatedTrailers.getGrossRevenue());
-            existingTrailers.setRevenuePerMile(updatedTrailers.getRevenuePerMile());
-            existingTrailers.setExpires(updatedTrailers.isExpires());
-            return trailersRepository.save(existingTrailers);
-        });
+    public ApiResponse updateTrailers(UUID id, TrailersDto trailersDto) {
+        Optional<Trailers> optionalTrailers = trailersRepository.findById(id);
+        if (optionalTrailers.isEmpty()) {
+            return new ApiResponse("not found", false);
+        }
+        Trailers trailers = optionalTrailers.get();
+        trailersMapper.updateAddressFromDto(trailersDto, trailers);
+        trailersRepository.save(trailers);
+        return new ApiResponse("Successfully updated trailers", true);
     }
 }

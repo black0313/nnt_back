@@ -1,7 +1,7 @@
+server:
+  port: 8080
+
 spring:
-  profiles:
-    active: dev
-    
   datasource:
     url: jdbc:postgresql://localhost:5432/nnt_project1
     username: postgres
@@ -14,7 +14,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
         database: postgresql
   sql:
     init:

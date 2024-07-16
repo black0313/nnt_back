@@ -22,6 +22,6 @@ public class Trailers extends AbsEntity {
     private int numberOfLoads;
     private double grossRevenue;
     private double revenuePerMile;
-
     private boolean expires;
+
 }

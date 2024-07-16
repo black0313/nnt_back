@@ -1,20 +1,17 @@
-package com.example.nnt_project.entity;
+package com.example.nnt_project.payload;
 
-import com.example.nnt_project.entity.template.AbsEntity;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Truck extends AbsEntity {
+public class TruckDto {
+    private UUID id;
     private String truckNumber;
     private String truckType;
     private String licencePlate;

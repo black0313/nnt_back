@@ -2,6 +2,7 @@ package com.example.nnt_project.controller;
 
 import com.example.nnt_project.entity.Truck;
 import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.TruckDto;
 import com.example.nnt_project.service.TruckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +19,21 @@ public class TruckController {
     private final TruckService truckService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> saveTruck(@RequestBody Truck truck) {
-        Truck savedTruck = truckService.saveTruck(truck);
-        return ResponseEntity.ok(new ApiResponse("Truck saved successfully", true, savedTruck));
+    public ResponseEntity<ApiResponse> saveTruck(@RequestBody TruckDto truckDto) {
+        ApiResponse apiResponse = truckService.saveTruck(truckDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getTruckById(@PathVariable UUID id) {
-        return truckService.getTruckById(id)
-                .map(truck -> ResponseEntity.ok(new ApiResponse("Truck found", true, truck)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Truck not found", false)));
+        ApiResponse apiResponse = truckService.getTruckById(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse> getAllTrucks() {
-        List<Truck> trucks = truckService.getAllTrucks();
-        return ResponseEntity.ok(new ApiResponse("Trucks retrieved successfully", true, trucks));
+        ApiResponse apiResponse = truckService.getAllTrucks();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @DeleteMapping("/{id}")

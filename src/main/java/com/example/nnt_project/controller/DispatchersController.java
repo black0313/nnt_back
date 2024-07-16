@@ -29,7 +29,7 @@ public class DispatchersController {
     @GetMapping
     public ResponseEntity<?> getAllDispatchers() {
         ApiResponse apiResponse = dispatchersService.getAllDispatchers();
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 400).body(apiResponse);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @PostMapping

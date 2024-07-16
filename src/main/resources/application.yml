@@ -1,32 +1,3 @@
-server:
-  port: 8080
-
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5433/nnt_project1
-    username: postgres
-    password: root123
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        database: postgresql
-  sql:
-    init:
-      mode: always
-
-# Enable Swagger
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-
-# CORS configuration
-cors:
-  allowed-origins: http://localhost:3000
+  profiles:
+    active: dev

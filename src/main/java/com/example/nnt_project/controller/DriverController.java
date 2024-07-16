@@ -2,6 +2,7 @@ package com.example.nnt_project.controller;
 
 import com.example.nnt_project.entity.Driver;
 import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.DriverDto;
 import com.example.nnt_project.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +19,21 @@ public class DriverController {
     private final DriverService driverService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> saveDriver(@RequestBody Driver driver) {
-        Driver savedDriver = driverService.saveDriver(driver);
-        return ResponseEntity.ok(new ApiResponse("Driver saved successfully", true, savedDriver));
+    public ResponseEntity<ApiResponse> saveDriver(@RequestBody DriverDto driverDto) {
+        ApiResponse apiResponse = driverService.saveDriver(driverDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getDriverById(@PathVariable UUID id) {
-        return driverService.getDriverById(id)
-                .map(driver -> ResponseEntity.ok(new ApiResponse("Driver found", true, driver)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Driver not found", false)));
+        ApiResponse apiResponse = driverService.getDriverById(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse> getAllDrivers() {
-        List<Driver> drivers = driverService.getAllDrivers();
-        return ResponseEntity.ok(new ApiResponse("Drivers retrieved successfully", true, drivers));
+        ApiResponse apiResponse = driverService.getAllDrivers();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @DeleteMapping("/{id}")

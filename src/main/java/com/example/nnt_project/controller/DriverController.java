@@ -1,5 +1,6 @@
 package com.example.nnt_project.controller;
 
+import com.example.nnt_project.annotations.CheckPermission;
 import com.example.nnt_project.entity.Driver;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.DriverDto;
@@ -18,30 +19,35 @@ public class DriverController {
 
     private final DriverService driverService;
 
+    @CheckPermission("ADD_DRIVER")
     @PostMapping
     public ResponseEntity<ApiResponse> saveDriver(@RequestBody DriverDto driverDto) {
         ApiResponse apiResponse = driverService.saveDriver(driverDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("GET_DRIVER")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getDriverById(@PathVariable UUID id) {
         ApiResponse apiResponse = driverService.getDriverById(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("GET_DRIVER")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllDrivers() {
         ApiResponse apiResponse = driverService.getAllDrivers();
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("ADD_DRIVER")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteDriver(@PathVariable UUID id) {
         driverService.deleteDriver(id);
         return ResponseEntity.ok(new ApiResponse("Driver deleted successfully", true));
     }
 
+    @CheckPermission("ADD_DRIVER")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> updateDriver(@PathVariable UUID id, @RequestBody Driver updatedDriver) {
         return driverService.updateDriver(id, updatedDriver)

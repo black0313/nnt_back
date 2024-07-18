@@ -1,12 +1,10 @@
 package com.example.nnt_project.component;
 
-import com.example.nnt_project.entity.Broker;
 import com.example.nnt_project.entity.Facility;
 import com.example.nnt_project.entity.PickupAddress;
-import com.example.nnt_project.repository.BrokerRepository;
-import com.example.nnt_project.repository.FacilityRepository;
-import com.example.nnt_project.repository.PickupAddressRepository;
-import com.example.nnt_project.repository.UserRepository;
+import com.example.nnt_project.entity.Role;
+import com.example.nnt_project.enums.Permissions;
+import com.example.nnt_project.repository.*;
 import com.example.nnt_project.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +15,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.nnt_project.role.Role.*;
-
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
@@ -28,9 +24,9 @@ public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final BrokerRepository brokerRepository;
     private final FacilityRepository facilityRepository;
     private final PickupAddressRepository pickupAddressRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     public void run(String... args) {
@@ -42,7 +38,7 @@ public class DataLoader implements CommandLineRunner {
                         .lastname("Adminbekov")
                         .username("admin")
                         .password(passwordEncoder.encode("123"))
-                        .role(ADMIN)
+                        .role(roleRepository.save(new Role("Admin", Arrays.stream(Permissions.values()).toList())))
                         .build();
                 userRepository.save(admin);
             }
@@ -53,7 +49,7 @@ public class DataLoader implements CommandLineRunner {
                         .lastname("Manager")
                         .username("manager")
                         .password(passwordEncoder.encode("123"))
-                        .role(MANAGER)
+                        .role(roleRepository.save(new Role("Manager", Arrays.stream(Permissions.values()).toList())))
                         .build();
                 userRepository.save(manager);
             }
@@ -64,7 +60,7 @@ public class DataLoader implements CommandLineRunner {
                         .lastname("Dispatchov")
                         .username("dispatcher")
                         .password(passwordEncoder.encode("123"))
-                        .role(DISPATCHER)
+                        .role(roleRepository.save(new Role("Dispatcher", Arrays.stream(Permissions.values()).toList())))
                         .build();
                 userRepository.save(dispatcher);
             }

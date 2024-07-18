@@ -1,46 +1,49 @@
 package com.example.nnt_project.user;
 
-import com.example.nnt_project.role.Role;
+import com.example.nnt_project.entity.Role;
+import com.example.nnt_project.entity.template.AbsEntity;
+import com.example.nnt_project.enums.Permissions;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.transaction.Transactional;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Data
-@NoArgsConstructor
 @Builder
+@Entity(name = "users")
+@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "_user", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
-public class User implements UserDetails {
+@EqualsAndHashCode(callSuper = true)
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
+public class User extends AbsEntity implements UserDetails {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
     private String firstname;
+
     private String lastname;
+
     private String username;
+
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Role role;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<SimpleGrantedAuthority> authorities = role.getPermissions().stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
-                .collect(Collectors.toSet());
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
-        return authorities;
+        List<Permissions> permissions = this.role.getPermissions();
+        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+        for (Permissions permission : permissions) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(permission.name()));
+        }
+        return grantedAuthorities;
     }
 
     @Override

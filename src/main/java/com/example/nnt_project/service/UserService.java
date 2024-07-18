@@ -1,9 +1,8 @@
 package com.example.nnt_project.service;
 
-import com.example.nnt_project.dto.DispatcherDTO;
+
 import com.example.nnt_project.repository.UserRepository;
 import com.example.nnt_project.user.User;
-import com.example.nnt_project.role.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -63,20 +62,20 @@ public class UserService {
     }
 
 
-    public List<DispatcherDTO> getDispatchers() {
-        return userRepository.findAll().stream()
-                .filter(user -> Role.DISPATCHER.equals(user.getRole()))
-                .map(this::convertToDispatcherDTO)
-                .collect(Collectors.toList());
-    }
+//    public List<DispatcherDTO> getDispatchers() {
+//        return userRepository.findAll().stream()
+//                .filter(user -> Role.DISPATCHER.equals(user.getRole()))
+//                .map(this::convertToDispatcherDTO)
+//                .collect(Collectors.toList());
+//    }
 
-    private DispatcherDTO convertToDispatcherDTO(User user) {
-        return DispatcherDTO.builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .username(user.getUsername())
-                .role(user.getRole().name())
-                .build();
-    }
+//    private DispatcherDTO convertToDispatcherDTO(User user) {
+//        return DispatcherDTO.builder()
+//                .id(user.getId())
+//                .firstname(user.getFirstname())
+//                .lastname(user.getLastname())
+//                .username(user.getUsername())
+//                .role(user.getRole().name())
+//                .build();
+//    }
 }

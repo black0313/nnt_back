@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/nnt_project1
+    url: jdbc:postgresql://localhost:5433/nnt_project1
     username: postgres
     password: root123
     driver-class-name: org.postgresql.Driver
@@ -15,6 +15,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         database: postgresql
+        enable_lazy_load_no_trans: true
   sql:
     init:
       mode: always

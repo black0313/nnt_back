@@ -1,6 +1,6 @@
 package com.example.nnt_project.controller;
 
-import com.example.nnt_project.dto.DispatcherDTO;
+import com.example.nnt_project.annotations.CheckPermission;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.service.UserService;
 import com.example.nnt_project.user.User;
@@ -18,6 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @CheckPermission("ADD_USER")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable UUID id) {
         return userService.getUserById(id)
@@ -25,6 +26,7 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.ok(new ApiResponse("User not found", false)));
     }
 
+    @CheckPermission("ADD_USER")
     @PostMapping
     public ResponseEntity<ApiResponse> saveUser(@RequestBody User user) {
         try {
@@ -35,24 +37,27 @@ public class UserController {
         }
     }
 
+    @CheckPermission("GET_USER")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(new ApiResponse("Users retrieved successfully", true, users));
     }
 
-    @GetMapping("/dispatchers")
-    public ResponseEntity<ApiResponse> getDispatchers() {
-        List<DispatcherDTO> dispatchers = userService.getDispatchers();
-        return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchers));
-    }
+//    @GetMapping("/dispatchers")
+//    public ResponseEntity<ApiResponse> getDispatchers() {
+//        List<DispatcherDTO> dispatchers = userService.getDispatchers();
+//        return ResponseEntity.ok(new ApiResponse("Dispatchers retrieved successfully", true, dispatchers));
+//    }
 
+    @CheckPermission("ADD_USER")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(new ApiResponse("User deleted successfully", true));
     }
 
+    @CheckPermission("ADD_USER")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> updateUser(@PathVariable UUID id, @RequestBody User updatedUser) {
         return userService.updateUser(id, updatedUser)

@@ -1,6 +1,6 @@
 package com.example.nnt_project.auth;
 
-import com.example.nnt_project.role.Role;
+import com.example.nnt_project.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

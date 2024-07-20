@@ -26,5 +26,8 @@ public enum Permissions {
     GET_TRUCK,
 
     ADD_USER,
-    GET_USER
+    GET_USER,
+
+    GET_ROLE,
+    ADD_ROLE
 }

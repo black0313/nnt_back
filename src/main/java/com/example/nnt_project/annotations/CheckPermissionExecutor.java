@@ -2,7 +2,6 @@ package com.example.nnt_project.annotations;
 
 import com.example.nnt_project.exceptions.ForbiddenException;
 import com.example.nnt_project.user.User;
-import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.core.GrantedAuthority;

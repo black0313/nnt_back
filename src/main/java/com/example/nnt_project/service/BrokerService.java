@@ -1,6 +1,9 @@
 package com.example.nnt_project.service;
 
 import com.example.nnt_project.entity.Broker;
+import com.example.nnt_project.mapper.BrokerMapper;
+import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.BrokerDto;
 import com.example.nnt_project.repository.BrokerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,27 +17,38 @@ import java.util.UUID;
 public class BrokerService {
 
     private final BrokerRepository brokerRepository;
+    private final BrokerMapper brokerMapper;
 
-    public List<Broker> getAllBrokers() {
-        return brokerRepository.findAll();
+    public ApiResponse getAllBrokers() {
+        List<Broker> all = brokerRepository.findAll();
+        if (all.isEmpty()) {
+            return new ApiResponse("no broker found");
+        }
+        return new ApiResponse("found", true, brokerMapper.toBrokerDtoList(all));
     }
 
-    public Optional<Broker> getBrokerById(UUID id) {
-        return brokerRepository.findById(id);
+    public ApiResponse getBrokerById(UUID id) {
+        Optional<Broker> optionalBroker = brokerRepository.findById(id);
+        return optionalBroker.map(broker -> new ApiResponse("found", true, brokerMapper.brokerToDto(broker))).orElseGet(() -> new ApiResponse("no broker found"));
     }
 
-    public Broker saveBroker(Broker broker) {
-        return brokerRepository.save(broker);
+    public ApiResponse saveBroker(BrokerDto brokerDto) {
+        brokerRepository.save(brokerMapper.brokerToEntity(brokerDto));
+        return new ApiResponse("successfully saved broker", true);
     }
 
     public void deleteBroker(UUID id) {
         brokerRepository.deleteById(id);
     }
 
-    public Optional<Broker> updateBroker(UUID id, Broker updatedBroker) {
-        return brokerRepository.findById(id).map(existingBroker -> {
-//            existingBroker.setName(updatedBroker.getName());
-            return brokerRepository.save(existingBroker);
-        });
+    public ApiResponse updateBroker(UUID id, BrokerDto brokerDto) {
+        Optional<Broker> optionalBroker = brokerRepository.findById(id);
+        if (optionalBroker.isPresent()) {
+            Broker broker = optionalBroker.get();
+            brokerMapper.updateBrokerFromDto(brokerDto, broker);
+            brokerRepository.save(broker);
+            return new ApiResponse("successfully updated broker", true);
+        }
+        return new ApiResponse("no broker found");
     }
 }

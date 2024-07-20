@@ -1,13 +1,13 @@
 package com.example.nnt_project.controller;
 
-import com.example.nnt_project.entity.Broker;
+import com.example.nnt_project.annotations.CheckPermission;
 import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.BrokerDto;
 import com.example.nnt_project.service.BrokerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,35 +17,38 @@ public class BrokerController {
 
     private final BrokerService brokerService;
 
+    @CheckPermission("GET_BROKER")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllBrokers() {
-        List<Broker> brokers = brokerService.getAllBrokers();
-        return ResponseEntity.ok(new ApiResponse("Brokers retrieved successfully", true, brokers));
+        ApiResponse apiResponse = brokerService.getAllBrokers();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("GET_BROKER")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getBrokerById(@PathVariable UUID id) {
-        return brokerService.getBrokerById(id)
-                .map(broker -> ResponseEntity.ok(new ApiResponse("Broker found", true, broker)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Broker not found", false)));
+        ApiResponse apiResponse = brokerService.getBrokerById(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("ADD_BROKER")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveBroker(@RequestBody Broker broker) {
-        Broker savedBroker = brokerService.saveBroker(broker);
-        return ResponseEntity.ok(new ApiResponse("Broker saved successfully", true, savedBroker));
+    public ResponseEntity<?> saveBroker(@RequestBody BrokerDto brokerDto) {
+        ApiResponse apiResponse = brokerService.saveBroker(brokerDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("ADD_BROKER")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteBroker(@PathVariable UUID id) {
         brokerService.deleteBroker(id);
         return ResponseEntity.ok(new ApiResponse("Broker deleted successfully", true));
     }
 
+    @CheckPermission("ADD_BROKER")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateBroker(@PathVariable UUID id, @RequestBody Broker updatedBroker) {
-        return brokerService.updateBroker(id, updatedBroker)
-                .map(broker -> ResponseEntity.ok(new ApiResponse("Broker updated successfully", true, broker)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Broker not found", false)));
+    public ResponseEntity<ApiResponse> updateBroker(@PathVariable UUID id, @RequestBody BrokerDto brokerDto) {
+        ApiResponse apiResponse = brokerService.updateBroker(id, brokerDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 }

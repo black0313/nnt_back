@@ -36,6 +36,7 @@ public class AuthenticationService {
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
                 .role(user.getRole().getName())
+                .permissions(user.getRole().getPermissions())
                 .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.example.nnt_project.config;
 
 import com.example.nnt_project.entity.Driver;
+import com.example.nnt_project.entity.Load;
 import com.example.nnt_project.payload.DriverDto;
+import com.example.nnt_project.payload.LoadDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
@@ -21,6 +23,13 @@ public class ModelMapperConfig {
             protected void configure() {
                 skip(destination.getTruck());
                 skip(destination.getAddress());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<Load, LoadDto>() {
+            @Override
+            protected void configure() {
+                skip(destination.getShipperConsigneeDtoList());
             }
         });
 

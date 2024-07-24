@@ -1,23 +1,20 @@
-package com.example.nnt_project.entity;
+package com.example.nnt_project.payload;
 
-import com.example.nnt_project.entity.template.AbsEntity;
-import jakarta.persistence.*;
+import com.example.nnt_project.entity.*;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Load extends AbsEntity {
+public class LoadDto {
 
+    private UUID id;
     private String internalLoadNumber;
 //    private String loadNumber;
 //    private String unitNumber;
@@ -28,18 +25,11 @@ public class Load extends AbsEntity {
 //    private double loadedMile;
 //    private double ratePerMile;
 
-    @ManyToOne
-    private Broker broker;
 
-    @ManyToOne
-    private Driver driver;
+    private UUID driverId;
+    private UUID truckId;
+    private UUID trailerId;
+    private UUID dispatcherId;
 
-    @ManyToOne
-    private Truck truck;
-
-    @ManyToOne
-    private Trailers trailers;
-
-    @ManyToOne
-    private Dispatchers dispatchers;
+    private List<ShipperConsigneeDto> shipperConsigneeDtoList;
 }

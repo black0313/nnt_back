@@ -1,7 +1,6 @@
 package com.example.nnt_project.controller;
 
 import com.example.nnt_project.annotations.CheckPermission;
-import com.example.nnt_project.dto.DispatchersDto;
 import com.example.nnt_project.entity.Dispatchers;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.DispatcherDTO;

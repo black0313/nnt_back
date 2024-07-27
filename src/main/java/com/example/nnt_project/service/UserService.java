@@ -1,6 +1,10 @@
 package com.example.nnt_project.service;
 
 
+import com.example.nnt_project.entity.Role;
+import com.example.nnt_project.payload.ApiResponse;
+import com.example.nnt_project.payload.UserDto;
+import com.example.nnt_project.repository.RoleRepository;
 import com.example.nnt_project.repository.UserRepository;
 import com.example.nnt_project.user.User;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,29 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+
+    public ApiResponse createUser(UserDto userDto) {
+
+        boolean exists = userRepository.existsByUsername(userDto.getUsername());
+        if (exists)
+            return new ApiResponse("Username already exists!");
+
+        Optional<Role> optionalRole = roleRepository.findById(userDto.getRoleId());
+        if (optionalRole.isEmpty())
+            return new ApiResponse("Role not found!");
+
+        User user = new User();
+        user.setUsername(userDto.getUsername());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setFirstname(userDto.getFirstname());
+        user.setLastname(userDto.getLastname());
+        user.setRole(optionalRole.get());
+        userRepository.save(user);
+
+        return new ApiResponse("User created!", true);
+    }
+
 
     public Optional<User> getUserById(UUID id) {
         return userRepository.findById(id);
@@ -27,16 +54,6 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User saveUser(User user) {
-        if (user.getRole() == null) {
-            throw new IllegalArgumentException("Role must not be null");
-        }
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
 
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);

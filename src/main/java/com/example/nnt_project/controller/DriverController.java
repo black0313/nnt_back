@@ -6,8 +6,10 @@ import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.DriverDto;
 import com.example.nnt_project.service.DriverService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +25,13 @@ public class DriverController {
     @PostMapping
     public ResponseEntity<ApiResponse> saveDriver(@RequestBody DriverDto driverDto) {
         ApiResponse apiResponse = driverService.saveDriver(driverDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @CheckPermission("ADD_DRIVER")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDriver(@PathVariable UUID id, @RequestBody DriverDto driverDto) {
+        ApiResponse apiResponse = driverService.updateDriver(id, driverDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -45,13 +54,5 @@ public class DriverController {
     public ResponseEntity<ApiResponse> deleteDriver(@PathVariable UUID id) {
         driverService.deleteDriver(id);
         return ResponseEntity.ok(new ApiResponse("Driver deleted successfully", true));
-    }
-
-    @CheckPermission("ADD_DRIVER")
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateDriver(@PathVariable UUID id, @RequestBody Driver updatedDriver) {
-        return driverService.updateDriver(id, updatedDriver)
-                .map(driver -> ResponseEntity.ok(new ApiResponse("Driver updated successfully", true, driver)))
-                .orElseGet(() -> ResponseEntity.ok(new ApiResponse("Driver not found", false)));
     }
 }

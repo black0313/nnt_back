@@ -3,13 +3,10 @@ package com.example.nnt_project.entity;
 import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -21,11 +18,14 @@ public class Driver extends AbsEntity {
     private String driverPhone;
     private String driverEmail;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
     private  String zipCode;
-    private boolean licenceNo;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Attachment licenceNo;
+
     private Timestamp DateOfBirth;
 
     @ManyToOne

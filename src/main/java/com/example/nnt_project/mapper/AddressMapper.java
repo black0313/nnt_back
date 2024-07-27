@@ -1,9 +1,7 @@
 package com.example.nnt_project.mapper;
 
 import com.example.nnt_project.entity.Address;
-import com.example.nnt_project.entity.Driver;
 import com.example.nnt_project.payload.AddressDto;
-import com.example.nnt_project.payload.DriverDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

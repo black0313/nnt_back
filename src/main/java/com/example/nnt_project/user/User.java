@@ -5,7 +5,6 @@ import com.example.nnt_project.entity.template.AbsEntity;
 import com.example.nnt_project.enums.Permissions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;

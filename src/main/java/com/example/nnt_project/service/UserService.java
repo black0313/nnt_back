@@ -46,53 +46,48 @@ public class UserService {
     }
 
 
-    public Optional<User> getUserById(UUID id) {
-        return userRepository.findById(id);
+    public ApiResponse getUserById(UUID id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        return optionalUser.map(user -> new ApiResponse("User found!", true, user)).orElseGet(() -> new ApiResponse("User not found!"));
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public ApiResponse getAllUsers() {
+        List<User> all = userRepository.findAll();
+        if (all.isEmpty()) {
+            return new ApiResponse("No users found!");
+        }
+        return new ApiResponse("Found " + all.size() + " users!", true, all);
     }
 
 
-    public void deleteUser(UUID id) {
+    public ApiResponse deleteUser(UUID id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty())
+            return new ApiResponse("User not found!");
         userRepository.deleteById(id);
+        return new ApiResponse("User deleted!");
     }
 
-    public Optional<User> updateUser(UUID id, User updatedUser) {
-        return userRepository.findById(id).map(existingUser -> {
-            // Check if the new username is different and already exists
-            if (!existingUser.getUsername().equals(updatedUser.getUsername()) &&
-                    userRepository.findByUsername(updatedUser.getUsername()).isPresent()) {
-                throw new IllegalArgumentException("Username already exists");
-            }
+    public ApiResponse updateUser(UUID id, UserDto userDto) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty())
+            return new ApiResponse("User not found!");
 
-            existingUser.setFirstname(updatedUser.getFirstname());
-            existingUser.setLastname(updatedUser.getLastname());
-            existingUser.setUsername(updatedUser.getUsername());
-            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            }
-            existingUser.setRole(updatedUser.getRole());
-            return userRepository.save(existingUser);
-        });
+        User user = optionalUser.get();
+        if (!user.getUsername().equals(userDto.getUsername())
+                && userRepository.existsByUsername(userDto.getUsername()))
+            return new ApiResponse("Username already exists!");
+
+        if (userDto.getRoleId()!=null) {
+            Optional<Role> optionalRole = roleRepository.findById(userDto.getRoleId());
+            optionalRole.ifPresent(user::setRole);
+        }
+
+        user.setUsername(userDto.getUsername());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setFirstname(userDto.getFirstname());
+        user.setLastname(userDto.getLastname());
+        userRepository.save(user);
+        return new ApiResponse("User updated!", true);
     }
-
-
-//    public List<DispatcherDTO> getDispatchers() {
-//        return userRepository.findAll().stream()
-//                .filter(user -> Role.DISPATCHER.equals(user.getRole()))
-//                .map(this::convertToDispatcherDTO)
-//                .collect(Collectors.toList());
-//    }
-
-//    private DispatcherDTO convertToDispatcherDTO(User user) {
-//        return DispatcherDTO.builder()
-//                .id(user.getId())
-//                .firstname(user.getFirstname())
-//                .lastname(user.getLastname())
-//                .username(user.getUsername())
-//                .role(user.getRole().name())
-//                .build();
-//    }
 }

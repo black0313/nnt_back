@@ -21,4 +21,5 @@ public class DispatcherDTO {
     private String state;
     private String street;
     private UUID userId;
+    private UUID dispatchersTeamId;
 }

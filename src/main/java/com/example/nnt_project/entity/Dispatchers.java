@@ -2,11 +2,7 @@ package com.example.nnt_project.entity;
 
 import com.example.nnt_project.entity.template.AbsEntity;
 import com.example.nnt_project.user.User;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,4 +26,7 @@ public class Dispatchers extends AbsEntity {
     private Address address;
 
     private UUID userId;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private DispatchersTeam dispatchersTeam;
 }

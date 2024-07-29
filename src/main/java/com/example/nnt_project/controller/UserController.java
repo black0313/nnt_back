@@ -21,7 +21,7 @@ public class UserController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
         ApiResponse apiResponse = userService.updateUser(id, userDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);

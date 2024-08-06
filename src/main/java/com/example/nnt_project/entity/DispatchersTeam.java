@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class DispatchersTeam extends AbsEntity {
     private String name;
 
+    private Long groupId;
+
     public DispatchersTeam(String name) {
         this.name = name;
     }

@@ -19,14 +19,6 @@ import java.util.UUID;
 public class Load extends AbsEntity {
 
     private String internalLoadNumber;
-//    private String loadNumber;
-//    private String unitNumber;
-//    private boolean assigedTrailer;
-//
-//    private double rate;
-//    private double deadHead;
-//    private double loadedMile;
-//    private double ratePerMile;
 
     @ManyToOne
     private Broker broker;
@@ -36,6 +28,9 @@ public class Load extends AbsEntity {
 
     @ManyToOne
     private Truck truck;
+
+    @ManyToOne
+    private Facility facility;
 
     @ManyToOne
     private Trailers trailers;

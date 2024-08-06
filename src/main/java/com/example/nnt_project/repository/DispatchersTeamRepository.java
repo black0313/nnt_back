@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface DispatchersTeamRepository extends JpaRepository<DispatchersTeam, UUID> {
     boolean existsByName(String name);
+    boolean existsByGroupId(Long groupId);
 }

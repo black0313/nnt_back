@@ -33,7 +33,7 @@ public class DispatchersTeamService {
         return new ApiResponse("found " + all.size() + " dispatchersTeams", true, all);
     }
 
-    public ApiResponse update(UUID id, String name) {
+    public ApiResponse update(UUID id, String name, Long groupId) {
         Optional<DispatchersTeam> optional = dispatchersTeamRepository.findById(id);
         if (optional.isEmpty())
             return new ApiResponse("dispatchersTeam not found");
@@ -42,7 +42,12 @@ public class DispatchersTeamService {
                 dispatchersTeamRepository.existsById(id))
             return new ApiResponse("dispatchersTeam already exists");
 
+        if (!dispatchersTeam.getGroupId().equals(groupId)&&
+                dispatchersTeamRepository.existsByGroupId(groupId))
+            return new ApiResponse("dispatchersTeam group id already exists");
+
         dispatchersTeam.setName(name);
+        dispatchersTeam.setGroupId(groupId);
         dispatchersTeamRepository.save(dispatchersTeam);
 
         return new ApiResponse("dispatchersTeam updated", true);

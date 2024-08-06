@@ -31,8 +31,8 @@ public class DispatchersTeamController {
 
     @CheckPermission("ADD_DISPATCHERS")
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable UUID id, @RequestParam String name) {
-        ApiResponse apiResponse = dispatchersTeamService.update(id,name);
+    public ResponseEntity<?> update(@PathVariable UUID id, @RequestParam String name, @RequestParam Long groupId) {
+        ApiResponse apiResponse = dispatchersTeamService.update(id,name,groupId);
         return ResponseEntity.status(apiResponse.isSuccess()?200:409).body(apiResponse);
     }
 

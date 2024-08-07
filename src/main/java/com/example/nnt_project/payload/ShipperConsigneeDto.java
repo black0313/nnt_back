@@ -15,16 +15,10 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ShipperConsigneeDto {
     private UUID id;
-    private String name;
-    private String location;
-    private Date date;
-    private boolean showTime;
+    private Date deliveryDate;
     private String description;
-    private String type;
-    private int quantity;
-    private double weight;
-    private double value;
-    private String notes;
-    private String poNumbers;
+    private Date pickDate;
+    private Double weight;
+    private Double value;
     private boolean shipper;
 }

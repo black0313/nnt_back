@@ -34,10 +34,12 @@ public class LoadService {
         Load load = loadRepository.save(loadMapper.toEntity(loadDto));
         List<ShipperConsignee> allEntity =
                 shipperConsigneeMapper.toEntity(loadDto.getShipperConsigneeDtoList());
+
         for (ShipperConsignee shipperConsignee : allEntity) {
             shipperConsignee.setLoad(load);
             shipperConsigneeRepository.save(shipperConsignee);
         }
+
         Optional<DispatchersTeam> optionalDispatchersTeam =
                 dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId());
 
@@ -50,6 +52,7 @@ public class LoadService {
                         "created at = " + load.getCreatedAt());
             }
         }
+
         return new ApiResponse("successfully created", true);
     }
 }

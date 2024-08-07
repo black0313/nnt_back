@@ -20,6 +20,7 @@ public class LoadDto {
     private UUID dispatcherId;
     private UUID facilityId;
     private UUID dispatcherTeamId;
+    private UUID brokerId;
     private List<ShipperConsigneeDto> shipperConsigneeDtoList;
 
 }

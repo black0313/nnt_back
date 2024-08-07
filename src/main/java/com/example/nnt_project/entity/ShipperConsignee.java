@@ -31,9 +31,6 @@ public class ShipperConsignee extends AbsEntity {
     private String poNumbers;
 
     @ManyToOne
-    private Broker customsBroker;
-
-    @ManyToOne
     private Load load;
 
     private boolean shipper;

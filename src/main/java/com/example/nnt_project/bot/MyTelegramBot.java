@@ -19,12 +19,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "appnntBot"; // Bot username ni kiriting
+        return "nnt_e_bot"; // Bot username ni kiriting
     }
 
     @Override
     public String getBotToken() {
-        return "7054615642:AAGXOlJBsD0Ta5ij4MhhJ3kEa0OfX4DsDcM"; // Bot token ni kiriting
+        return "7230983333:AAEpuSk-_aDzQ_AFkwWPBgoxV4Dub4OusDw"; // Bot token ni kiriting
     }
 
     @Override

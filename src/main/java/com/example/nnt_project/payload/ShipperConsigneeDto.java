@@ -26,6 +26,5 @@ public class ShipperConsigneeDto {
     private double value;
     private String notes;
     private String poNumbers;
-    private UUID customsBrokerId;
     private boolean shipper;
 }

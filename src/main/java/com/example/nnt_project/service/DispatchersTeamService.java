@@ -38,13 +38,13 @@ public class DispatchersTeamService {
         if (optional.isEmpty())
             return new ApiResponse("dispatchersTeam not found");
         DispatchersTeam dispatchersTeam = optional.get();
-        if (!dispatchersTeam.getName().equals(name) &&
-                dispatchersTeamRepository.existsById(id))
-            return new ApiResponse("dispatchersTeam already exists");
-
-        if (!dispatchersTeam.getGroupId().equals(groupId)&&
-                dispatchersTeamRepository.existsByGroupId(groupId))
-            return new ApiResponse("dispatchersTeam group id already exists");
+//        if (!dispatchersTeam.getName().equals(name) &&
+//                dispatchersTeamRepository.existsById(id))
+//            return new ApiResponse("dispatchersTeam already exists");
+//
+//        if (!dispatchersTeam.getGroupId().equals(groupId)&&
+//                dispatchersTeamRepository.existsByGroupId(groupId))
+//            return new ApiResponse("dispatchersTeam group id already exists");
 
         dispatchersTeam.setName(name);
         dispatchersTeam.setGroupId(groupId);

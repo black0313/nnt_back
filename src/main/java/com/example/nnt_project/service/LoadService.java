@@ -1,20 +1,14 @@
 package com.example.nnt_project.service;
 
 import com.example.nnt_project.bot.MyTelegramBot;
-import com.example.nnt_project.entity.DispatchersTeam;
-import com.example.nnt_project.entity.Load;
-import com.example.nnt_project.entity.ShipperConsignee;
+import com.example.nnt_project.entity.*;
 import com.example.nnt_project.mapper.LoadMapper;
 import com.example.nnt_project.mapper.ShipperConsigneeMapper;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.LoadDto;
-import com.example.nnt_project.repository.DispatchersTeamRepository;
-import com.example.nnt_project.repository.LoadRepository;
-import com.example.nnt_project.repository.ShipperConsigneeRepository;
+import com.example.nnt_project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,12 +23,30 @@ public class LoadService {
     private final ShipperConsigneeMapper shipperConsigneeMapper;
     private final ShipperConsigneeRepository shipperConsigneeRepository;
     private final DispatchersTeamRepository dispatchersTeamRepository;
+    private final PickupAddressRepository pickupAddressRepository;
+    private final DriverRepository driverRepository;
+    private final BrokerRepository brokerRepository;
+    private final TrailersRepository trailersRepository;
+    private final TruckRepository truckRepository;
+    private final FacilityRepository facilityRepository;
+    private final DispatchersRepository dispatchersRepository;
 
     public ApiResponse create(LoadDto loadDto) {
-        Load load = loadRepository.save(loadMapper.toEntity(loadDto));
+        Load load = loadMapper.toEntity(loadDto);
+
+        pickupAddressRepository.findById(loadDto.getAddressId()).ifPresent(load::setAddress);
+        driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
+        brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
+        trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
+        truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
+        dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
+        facilityRepository.findById(loadDto.getFacilityId()).ifPresent(load::setFacility);
+        dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
+
         List<ShipperConsignee> allEntity =
                 shipperConsigneeMapper.toEntity(loadDto.getShipperConsigneeDtoList());
 
+        loadRepository.save(load);
         for (ShipperConsignee shipperConsignee : allEntity) {
             shipperConsignee.setLoad(load);
             shipperConsigneeRepository.save(shipperConsignee);
@@ -45,14 +57,15 @@ public class LoadService {
 
         if (optionalDispatchersTeam.isPresent()) {
             DispatchersTeam dispatchersTeam = optionalDispatchersTeam.get();
-            if (dispatchersTeam.getGroupId()!=null) {
+            if (dispatchersTeam.getGroupId() != null) {
                 myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(),
-                        "new load id = " + load.getId() +"\n"+
-                        "groupName = " + dispatchersTeam.getName() + "\n"+
-                        "created at = " + load.getCreatedAt());
+                        "<b>New load created</b>= " + load.getId() + "\n" +
+                                "<b> groupName <\b>= " + dispatchersTeam.getName() + "\n" +
+                                "<b> created at <\b>= " + load.getCreatedAt() + "\n" +
+                                "<b> address <\b>= " + load.getAddress().getAddress()+"\n"+
+                                "Entity =" + loadDto.toString());
             }
         }
-
         return new ApiResponse("successfully created", true);
     }
 }

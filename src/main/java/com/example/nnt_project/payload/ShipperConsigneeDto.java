@@ -1,8 +1,5 @@
 package com.example.nnt_project.payload;
 
-import com.example.nnt_project.entity.Broker;
-import com.example.nnt_project.entity.Load;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

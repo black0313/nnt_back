@@ -29,6 +29,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<Load, LoadDto>() {
             @Override
             protected void configure() {
+                skip(destination.getId());
                 skip(destination.getShipperConsigneeDtoList());
             }
         });

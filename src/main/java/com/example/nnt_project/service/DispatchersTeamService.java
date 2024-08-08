@@ -52,4 +52,12 @@ public class DispatchersTeamService {
 
         return new ApiResponse("dispatchersTeam updated", true);
     }
+
+    public ApiResponse getOne(UUID id) {
+        Optional<DispatchersTeam> optional = dispatchersTeamRepository.findById(id);
+        return optional.map(dispatchersTeam ->
+                new ApiResponse("dispatchersTeam found", true,
+                        dispatchersTeam)).orElseGet(() ->
+                new ApiResponse("dispatchersTeam not found"));
+    }
 }

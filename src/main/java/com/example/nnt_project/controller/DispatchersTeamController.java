@@ -29,6 +29,13 @@ public class DispatchersTeamController {
         return ResponseEntity.status(apiResponse.isSuccess()?200:409).body(apiResponse);
     }
 
+    @CheckPermission("GET_DISPATCHERS")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOne(@PathVariable UUID id) {
+        ApiResponse apiResponse = dispatchersTeamService.getOne(id);
+        return ResponseEntity.status(apiResponse.isSuccess()?200:409).body(apiResponse);
+    }
+
     @CheckPermission("ADD_DISPATCHERS")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestParam String name, @RequestParam Long groupId) {

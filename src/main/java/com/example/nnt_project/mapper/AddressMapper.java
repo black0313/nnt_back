@@ -27,4 +27,8 @@ public class AddressMapper {
                 .map(this::addressDto)
                 .collect(Collectors.toList());
     }
+
+    public void update(AddressDto addressDto, Address address) {
+        modelMapper.map(addressDto, address);
+    }
 }

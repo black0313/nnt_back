@@ -73,7 +73,7 @@ public class LoadService {
     }
 
     public ApiResponse getAll() {
-        List<Load> all = loadRepository.findAll();
+        List<Load> all = loadRepository.findAllByDeleteFalse();
         if (all.isEmpty())
             return new ApiResponse("not found", false);
 
@@ -81,7 +81,7 @@ public class LoadService {
         for (Load load : all) {
             LoadGetDto loadGetDto = new LoadGetDto();
             loadGetDto.setLoad(load);
-            loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadId(load.getId()));
+            loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(load.getId()));
             loadDtoList.add(loadGetDto);
         }
 
@@ -94,7 +94,7 @@ public class LoadService {
             return new ApiResponse("not found");
         LoadGetDto loadGetDto = new LoadGetDto();
         loadGetDto.setLoad(optionalLoad.get());
-        loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadId(optionalLoad.get().getId()));
+        loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(optionalLoad.get().getId()));
         return new ApiResponse("found", true, loadGetDto);
     }
 
@@ -104,8 +104,14 @@ public class LoadService {
             return new ApiResponse("not found");
 
         Load load = optionalLoad.get();
-        shipperConsigneeRepository.deleteAllByLoadId(load.getId());
-        loadRepository.delete(load);
+        load.setDelete(true);
+        loadRepository.save(load);
+
+        for (ShipperConsignee shipperConsignee : shipperConsigneeRepository.findAllByDeleteFalse()) {
+            shipperConsignee.setDelete(true);
+            shipperConsigneeRepository.save(shipperConsignee);
+        }
+
         return new ApiResponse("successfully deleted", true);
     }
 }

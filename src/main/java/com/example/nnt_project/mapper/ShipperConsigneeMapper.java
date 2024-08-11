@@ -24,4 +24,13 @@ public class ShipperConsigneeMapper {
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
+    public ShipperConsigneeDto toDto(ShipperConsignee shipperConsignee) {
+        return modelMapper.map(shipperConsignee, ShipperConsigneeDto.class);
+    }
+
+    public List<ShipperConsigneeDto> toDto(List<ShipperConsignee> shipperConsigneeList) {
+        return shipperConsigneeList.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 }

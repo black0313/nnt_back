@@ -6,10 +6,12 @@ import com.example.nnt_project.mapper.LoadMapper;
 import com.example.nnt_project.mapper.ShipperConsigneeMapper;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.LoadDto;
+import com.example.nnt_project.payload.LoadGetDto;
 import com.example.nnt_project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -71,10 +73,18 @@ public class LoadService {
     }
 
     public ApiResponse getAll() {
-        List<LoadDto> loadDtoList = loadMapper.loadDtoList(loadRepository.findAll());
-        for (LoadDto loadDto : loadDtoList) {
-            loadDto.setShipperConsigneeDtoList(shipperConsigneeMapper.toDto(shipperConsigneeRepository.findAllByLoadId(loadDto.getId())));
+        List<Load> all = loadRepository.findAll();
+        if (all.isEmpty())
+            return new ApiResponse("not found", false);
+
+        List<LoadGetDto> loadDtoList = new ArrayList<>();
+        for (Load load : all) {
+            LoadGetDto loadGetDto = new LoadGetDto();
+            loadGetDto.setLoad(load);
+            loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadId(load.getId()));
+            loadDtoList.add(loadGetDto);
         }
+
         return new ApiResponse("found", true, loadDtoList);
     }
 
@@ -82,11 +92,10 @@ public class LoadService {
         Optional<Load> optionalLoad = loadRepository.findById(id);
         if (optionalLoad.isEmpty())
             return new ApiResponse("not found");
-
-        LoadDto dto = loadMapper.toDto(optionalLoad.get());
-        dto.setShipperConsigneeDtoList(shipperConsigneeMapper.toDto(shipperConsigneeRepository.findAllByLoadId(dto.getId())));
-
-        return new ApiResponse("found", true, dto);
+        LoadGetDto loadGetDto = new LoadGetDto();
+        loadGetDto.setLoad(optionalLoad.get());
+        loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadId(optionalLoad.get().getId()));
+        return new ApiResponse("found", true, loadGetDto);
     }
 
     public ApiResponse delete(UUID id) {

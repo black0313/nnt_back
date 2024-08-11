@@ -28,4 +28,16 @@ public class LoadController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById (@PathVariable UUID id) {
+        ApiResponse apiResponse = loadService.getById(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete (@PathVariable UUID id) {
+        ApiResponse apiResponse = loadService.delete(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
 }

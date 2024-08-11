@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class LoadMapper {
@@ -13,5 +16,15 @@ public class LoadMapper {
 
     public Load toEntity(LoadDto loadDto) {
         return modelMapper.map(loadDto, Load.class);
+    }
+
+    public LoadDto toDto(Load load) {
+        return modelMapper.map(load, LoadDto.class);
+    }
+
+    public List<LoadDto> loadDtoList(List<Load> loadList) {
+        return loadList.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

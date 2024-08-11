@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +63,7 @@ public class LoadService {
                         "<b>New load created</b>= " + load.getId() + "\n" +
                                 "<b> groupName <\b>= " + dispatchersTeam.getName() + "\n" +
                                 "<b> created at <\b>= " + load.getCreatedAt() + "\n" +
-                                "<b> address <\b>= " + load.getAddress().getAddress()+"\n"+
+                                "<b> address <\b>= " + load.getAddress().getAddress() + "\n" +
                                 "Entity =" + loadDto.toString());
             }
         }
@@ -70,7 +71,32 @@ public class LoadService {
     }
 
     public ApiResponse getAll() {
-        List<Load> all = loadRepository.findAll();
-        return new ApiResponse("found",true,all);
+        List<LoadDto> loadDtoList = loadMapper.loadDtoList(loadRepository.findAll());
+        for (LoadDto loadDto : loadDtoList) {
+            loadDto.setShipperConsigneeDtoList(shipperConsigneeMapper.toDto(shipperConsigneeRepository.findAllByLoadId(loadDto.getId())));
+        }
+        return new ApiResponse("found", true, loadDtoList);
+    }
+
+    public ApiResponse getById(UUID id) {
+        Optional<Load> optionalLoad = loadRepository.findById(id);
+        if (optionalLoad.isEmpty())
+            return new ApiResponse("not found");
+
+        LoadDto dto = loadMapper.toDto(optionalLoad.get());
+        dto.setShipperConsigneeDtoList(shipperConsigneeMapper.toDto(shipperConsigneeRepository.findAllByLoadId(dto.getId())));
+
+        return new ApiResponse("found", true, dto);
+    }
+
+    public ApiResponse delete(UUID id) {
+        Optional<Load> optionalLoad = loadRepository.findById(id);
+        if (optionalLoad.isEmpty())
+            return new ApiResponse("not found");
+
+        Load load = optionalLoad.get();
+        shipperConsigneeRepository.deleteAllByLoadId(load.getId());
+        loadRepository.delete(load);
+        return new ApiResponse("successfully deleted", true);
     }
 }

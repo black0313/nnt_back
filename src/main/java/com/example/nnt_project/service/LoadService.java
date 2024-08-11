@@ -68,4 +68,9 @@ public class LoadService {
         }
         return new ApiResponse("successfully created", true);
     }
+
+    public ApiResponse getAll() {
+        List<Load> all = loadRepository.findAll();
+        return new ApiResponse("found",true,all);
+    }
 }

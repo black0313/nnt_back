@@ -27,4 +27,6 @@ public class ShipperConsignee extends AbsEntity {
     private Load load;
 
     private boolean shipper;
+
+    private Boolean delete = false;
 }

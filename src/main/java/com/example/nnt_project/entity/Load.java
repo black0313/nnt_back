@@ -43,4 +43,6 @@ public class Load extends AbsEntity {
 
     @ManyToOne
     private DispatchersTeam dispatchersTeam;
+
+    private Boolean delete = false;
 }

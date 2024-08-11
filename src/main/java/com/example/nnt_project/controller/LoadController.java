@@ -21,10 +21,11 @@ public class LoadController {
         ApiResponse apiResponse = loadService.create(loadDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<?> get (@PathVariable UUID id) {
-//        ApiResponse apiResponse = loadService.getById(id);
-//    }
+
+    @GetMapping
+    public ResponseEntity<?> getAll() {
+        ApiResponse apiResponse = loadService.getAll();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 
 }

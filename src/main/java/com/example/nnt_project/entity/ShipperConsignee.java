@@ -2,6 +2,7 @@ package com.example.nnt_project.entity;
 
 import com.example.nnt_project.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,11 +24,14 @@ public class ShipperConsignee extends AbsEntity {
     private Double weight;
     private Double value;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Load load;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private PickupAddress pickupAddress;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Facility facility;
 
     private boolean shipper;
 

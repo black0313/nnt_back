@@ -29,8 +29,6 @@ public class Load extends AbsEntity {
     @ManyToOne
     private Truck truck;
 
-    @ManyToOne
-    private Facility facility;
 
     @ManyToOne
     private Trailers trailers;

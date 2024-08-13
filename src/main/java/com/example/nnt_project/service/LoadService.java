@@ -50,7 +50,6 @@ public class LoadService {
         trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
         truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
         dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
-        facilityRepository.findById(loadDto.getFacilityId()).ifPresent(load::setFacility);
         dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
         loadRepository.save(load);
 
@@ -66,6 +65,7 @@ public class LoadService {
         for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
             ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
             pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
+            facilityRepository.findById(shipperConsigneeDto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
             shipperConsignee.setLoad(load);
             shipperConsigneeRepository.save(shipperConsignee);
             if (shipperConsignee.isShipper()) {

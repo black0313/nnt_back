@@ -27,9 +27,6 @@ public class Load extends AbsEntity {
     private Driver driver;
 
     @ManyToOne
-    private PickupAddress address;
-
-    @ManyToOne
     private Truck truck;
 
     @ManyToOne

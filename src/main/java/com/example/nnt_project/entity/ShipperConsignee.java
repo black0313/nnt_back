@@ -18,13 +18,16 @@ import java.util.Date;
 public class ShipperConsignee extends AbsEntity {
 
     private Date deliveryDate;
-    private String description;
     private Date pickDate;
+    private String description;
     private Double weight;
     private Double value;
 
     @ManyToOne
     private Load load;
+
+    @ManyToOne
+    private PickupAddress pickupAddress;
 
     private boolean shipper;
 

@@ -7,6 +7,7 @@ import com.example.nnt_project.mapper.ShipperConsigneeMapper;
 import com.example.nnt_project.payload.ApiResponse;
 import com.example.nnt_project.payload.LoadDto;
 import com.example.nnt_project.payload.LoadGetDto;
+import com.example.nnt_project.payload.ShipperConsigneeDto;
 import com.example.nnt_project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,9 +36,15 @@ public class LoadService {
     private final DispatchersRepository dispatchersRepository;
 
     public ApiResponse create(LoadDto loadDto) {
-        Load load = loadMapper.toEntity(loadDto);
 
-        pickupAddressRepository.findById(loadDto.getAddressId()).ifPresent(load::setAddress);
+        Optional<DispatchersTeam> optionalDispatchersTeam =
+                dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId());
+        if (optionalDispatchersTeam.isEmpty())
+            return new ApiResponse("no dispatcher team found");
+        DispatchersTeam dispatchersTeam = optionalDispatchersTeam.get();
+
+        // load qo'shish
+        Load load = loadMapper.toEntity(loadDto);
         driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
         brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
         trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
@@ -45,32 +52,53 @@ public class LoadService {
         dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
         facilityRepository.findById(loadDto.getFacilityId()).ifPresent(load::setFacility);
         dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
-
-        List<ShipperConsignee> allEntity =
-                shipperConsigneeMapper.toEntity(loadDto.getShipperConsigneeDtoList());
-
         loadRepository.save(load);
-        for (ShipperConsignee shipperConsignee : allEntity) {
+
+        StringBuilder message =
+                new StringBuilder("\uD83D\uDE9A " + load.getTruck().getTruckNumber() + "\n" +
+                        "\uD83D\uDD16 " + dispatchersTeam.getName() + "\n" +
+                        "\uD83D\uDC68 " + load.getDriver().getDriverName() + "\n \n");
+
+
+        List<String> pickupAddresses = new ArrayList<>();
+        List<String> consigneeAddresses = new ArrayList<>();
+        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
+        for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
+            ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
+            pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
             shipperConsignee.setLoad(load);
             shipperConsigneeRepository.save(shipperConsignee);
-        }
-
-        Optional<DispatchersTeam> optionalDispatchersTeam =
-                dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId());
-
-        if (optionalDispatchersTeam.isPresent()) {
-            DispatchersTeam dispatchersTeam = optionalDispatchersTeam.get();
-            if (dispatchersTeam.getGroupId() != null) {
-                myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(),
-                        "<b>New load created</b>= " + load.getId() + "\n" +
-                                "<b> groupName <\b>= " + dispatchersTeam.getName() + "\n" +
-                                "<b> created at <\b>= " + load.getCreatedAt() + "\n" +
-                                "<b> address <\b>= " + load.getAddress().getAddress() + "\n" +
-                                "Entity =" + loadDto.toString());
+            if (shipperConsignee.isShipper()) {
+                String pickupDate = shipperConsignee.getPickDate() != null ? shipperConsignee.getPickDate().toString() : "";
+                pickupAddresses.add("Pick up: \uD83C\uDFED \n " + shipperConsignee.getPickupAddress().getAddress() + "\n" +
+                        "Arrive: \n " + pickupDate + "\n");
+            } else {
+                String consigneeDate = shipperConsignee.getDeliveryDate() != null ? shipperConsignee.getDeliveryDate().toString() : "";
+                consigneeAddresses.add("\n Last Stop: \uD83C\uDFED \n " + shipperConsignee.getPickupAddress().getAddress() + "\n" +
+                        "Arrive: \n " + consigneeDate + "\n");
             }
         }
+
+        for (String pickupAddress : pickupAddresses) {
+            message.append(pickupAddress);
+        }
+
+        for (String consigneeAddress : consigneeAddresses) {
+            message.append(consigneeAddress);
+        }
+
+        String messageLast = "⚠\uFE0F-Traffic/Construction/Weather or other delays (photos or videos) -  should be updated in good time by drivers\n" +
+                "⚠\uFE0F-Please Scale the load after pick up, to avoid axle overweight. Missing scale ticket - 200$ penalty fee.\n" +
+                "⚠\uFE0F-After hooking up the trailer, PTI should be done !!!\n";
+        message.append(messageLast);
+
+        if (dispatchersTeam.getGroupId() != null) {
+            myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(), message.toString());
+        }
+
         return new ApiResponse("successfully created", true);
     }
+
 
     public ApiResponse getAll() {
         List<Load> all = loadRepository.findAllByDeleteFalse();

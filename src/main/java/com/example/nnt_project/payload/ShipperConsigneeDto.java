@@ -13,6 +13,7 @@ import java.util.UUID;
 public class ShipperConsigneeDto {
     private UUID id;
     private Date deliveryDate;
+    private UUID addressId;
     private String description;
     private Date pickDate;
     private Double weight;

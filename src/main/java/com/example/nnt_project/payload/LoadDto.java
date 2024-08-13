@@ -15,7 +15,6 @@ public class LoadDto {
     private UUID id;
     private String internalLoadNumber;
     private UUID driverId;
-    private UUID addressId;
     private UUID truckId;
     private UUID trailerId;
     private UUID dispatcherId;

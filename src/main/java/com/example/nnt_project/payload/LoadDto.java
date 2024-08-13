@@ -18,7 +18,6 @@ public class LoadDto {
     private UUID truckId;
     private UUID trailerId;
     private UUID dispatcherId;
-    private UUID facilityId;
     private UUID dispatcherTeamId;
     private UUID brokerId;
     private List<ShipperConsigneeDto> shipperConsigneeDtoList;

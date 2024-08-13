@@ -14,6 +14,7 @@ public class ShipperConsigneeDto {
     private UUID id;
     private Date deliveryDate;
     private UUID addressId;
+    private UUID facilityId;
     private String description;
     private Date pickDate;
     private Double weight;

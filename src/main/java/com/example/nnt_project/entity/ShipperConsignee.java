@@ -24,13 +24,13 @@ public class ShipperConsignee extends AbsEntity {
     private Double weight;
     private Double value;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Load load;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private PickupAddress pickupAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Facility facility;
 
     private boolean shipper;

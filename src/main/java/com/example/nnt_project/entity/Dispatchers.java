@@ -29,4 +29,6 @@ public class Dispatchers extends AbsEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private DispatchersTeam dispatchersTeam;
+
+    private boolean delete;
 }

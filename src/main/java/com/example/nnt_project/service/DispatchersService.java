@@ -45,8 +45,8 @@ public class DispatchersService {
         dispatchers.setUserId(dispatcherDTO.getUserId());
 
         User user = optionalUser.get();
-        dispatchers.setFirstname(user.getFirstname());
-        dispatchers.setLastname(user.getLastname());
+        dispatchers.setFirstname(dispatcherDTO.getFirstname());
+        dispatchers.setLastname(dispatcherDTO.getLastname());
 
         Address address = new Address();
         address.setCity(dispatcherDTO.getCity());
@@ -63,8 +63,15 @@ public class DispatchersService {
         return new ApiResponse("success saved", true);
     }
 
-    public void deleteDispatcher(UUID id) {
-        dispatchersRepository.deleteById(id);
+    public ApiResponse deleteDispatcher(UUID id) {
+        Optional<Dispatchers> optionalDispatchers = dispatchersRepository.findById(id);
+        if (optionalDispatchers.isEmpty())
+            return new ApiResponse("Dispatcher not found");
+
+        Dispatchers dispatchers = optionalDispatchers.get();
+        dispatchers.setDelete(true);
+        dispatchersRepository.save(dispatchers);
+        return new ApiResponse("success deleted",true);
     }
 
     public ApiResponse updateDispatcher(UUID id, DispatcherDTO dispatcherDTO) {
@@ -97,7 +104,7 @@ public class DispatchersService {
     }
 
     public ApiResponse getAllDispatchers() {
-        List<Dispatchers> allDispatchers = dispatchersRepository.findAll();
+        List<Dispatchers> allDispatchers = dispatchersRepository.findAllByDeleteFalse();
         if (allDispatchers.isEmpty()) {
             return new ApiResponse("not found",false);
         }
@@ -106,6 +113,6 @@ public class DispatchersService {
 
     public List<Dispatchers> getDispatchersByDateRange(String startDate, String endDate) {
         // Implement the logic to filter dispatchers by date range
-        return dispatchersRepository.findAll(); // Placeholder, implement your date filtering logic here
+        return dispatchersRepository.findAllByDeleteFalse(); // Placeholder, implement your date filtering logic here
     }
 }

@@ -45,8 +45,8 @@ public class DispatchersController {
     @CheckPermission("ADD_DISPATCHERS")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteDispatcher(@PathVariable UUID id) {
-        dispatchersService.deleteDispatcher(id);
-        return ResponseEntity.ok(new ApiResponse("Dispatcher deleted successfully", true));
+        ApiResponse apiResponse = dispatchersService.deleteDispatcher(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("ADD_DISPATCHERS")

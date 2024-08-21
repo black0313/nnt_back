@@ -22,6 +22,12 @@ public class LoadController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?>  create (@PathVariable UUID id, @RequestBody LoadDto loadDto) {
+        ApiResponse apiResponse = loadService.update(id,loadDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
     @GetMapping
     public ResponseEntity<?> getAll() {
         ApiResponse apiResponse = loadService.getAll();

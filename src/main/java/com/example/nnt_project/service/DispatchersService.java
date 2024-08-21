@@ -44,7 +44,6 @@ public class DispatchersService {
         dispatchers.setEmail(dispatcherDTO.getEmail());
         dispatchers.setUserId(dispatcherDTO.getUserId());
 
-        User user = optionalUser.get();
         dispatchers.setFirstname(dispatcherDTO.getFirstname());
         dispatchers.setLastname(dispatcherDTO.getLastname());
 

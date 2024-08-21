@@ -39,19 +39,15 @@ public class LoadService {
 
         Optional<DispatchersTeam> optionalDispatchersTeam =
                 dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId());
+
         if (optionalDispatchersTeam.isEmpty())
             return new ApiResponse("no dispatcher team found");
+
         DispatchersTeam dispatchersTeam = optionalDispatchersTeam.get();
 
         // load qo'shish
         Load load = loadMapper.toEntity(loadDto);
-        driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
-        brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
-        trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
-        truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
-        dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
-        dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
-        loadRepository.save(load);
+        setLoad(loadDto, load);
 
         StringBuilder message =
                 new StringBuilder("\uD83D\uDE9A " + load.getTruck().getTruckNumber() + "\n" +
@@ -99,6 +95,16 @@ public class LoadService {
         return new ApiResponse("successfully created", true);
     }
 
+    private void setLoad(LoadDto loadDto, Load load) {
+        driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
+        brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
+        trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
+        truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
+        dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
+        dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
+        loadRepository.save(load);
+    }
+
 
     public ApiResponse getAll() {
         List<Load> all = loadRepository.findAllByDeleteFalse();
@@ -141,5 +147,25 @@ public class LoadService {
         }
 
         return new ApiResponse("successfully deleted", true);
+    }
+
+    public ApiResponse update(UUID id, LoadDto loadDto) {
+        Optional<Load> optionalLoad = loadRepository.findById(id);
+        if (optionalLoad.isEmpty())
+            return new ApiResponse("not found");
+
+        Load load = optionalLoad.get();
+        setLoad(loadDto, load);
+
+        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
+        for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
+            ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
+            pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
+            facilityRepository.findById(shipperConsigneeDto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
+            shipperConsignee.setLoad(load);
+            shipperConsigneeRepository.save(shipperConsignee);
+        }
+
+        return new ApiResponse("successfully updated", true);
     }
 }

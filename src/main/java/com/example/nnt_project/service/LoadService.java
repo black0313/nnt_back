@@ -49,10 +49,11 @@ public class LoadService {
         Load load = loadMapper.toEntity(loadDto);
         setLoad(loadDto, load);
 
+
         StringBuilder message =
-                new StringBuilder("\uD83D\uDE9A " + load.getTruck().getTruckNumber() + "\n" +
+                new StringBuilder("\uD83D\uDE9A " + (load.getTruck() != null ? load.getTruck().getTruckNumber() : " ") + "\n" +
                         "\uD83D\uDD16 " + dispatchersTeam.getName() + "\n" +
-                        "\uD83D\uDC68 " + load.getDriver().getDriverName() + "\n \n");
+                        "\uD83D\uDC68 " + (load.getDriver() != null ? load.getDriver().getDriverName() : " ") + "\n \n");
 
 
         List<String> pickupAddresses = new ArrayList<>();
@@ -66,11 +67,11 @@ public class LoadService {
             shipperConsigneeRepository.save(shipperConsignee);
             if (shipperConsignee.isShipper()) {
                 String pickupDate = shipperConsignee.getPickDate() != null ? shipperConsignee.getPickDate().toString() : "";
-                pickupAddresses.add("Pick up: \uD83C\uDFED \n " + shipperConsignee.getPickupAddress().getAddress() + "\n" +
+                pickupAddresses.add("Pick up: \uD83C\uDFED \n " + (shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ") + "\n" +
                         "Arrive: \n " + pickupDate + "\n");
             } else {
                 String consigneeDate = shipperConsignee.getDeliveryDate() != null ? shipperConsignee.getDeliveryDate().toString() : "";
-                consigneeAddresses.add("\n Last Stop: \uD83C\uDFED \n " + shipperConsignee.getPickupAddress().getAddress() + "\n" +
+                consigneeAddresses.add("\n Last Stop: \uD83C\uDFED \n " + (shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ") + "\n" +
                         "Arrive: \n " + consigneeDate + "\n");
             }
         }
@@ -96,12 +97,22 @@ public class LoadService {
     }
 
     private void setLoad(LoadDto loadDto, Load load) {
-        driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
-        brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
-        trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
-        truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
+        if (loadDto.getDriverId() != null)
+            driverRepository.findById(loadDto.getDriverId()).ifPresent(load::setDriver);
+
+        if (loadDto.getBrokerId() != null)
+            brokerRepository.findById(loadDto.getBrokerId()).ifPresent(load::setBroker);
+
+        if (loadDto.getTruckId() != null)
+            truckRepository.findById(loadDto.getTruckId()).ifPresent(load::setTruck);
+
+        if (loadDto.getTrailerId() != null)
+            trailersRepository.findById(loadDto.getTrailerId()).ifPresent(load::setTrailers);
+
+        if (loadDto.getDispatcherId() != null)
+            dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
+
         dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
-        dispatchersRepository.findById(loadDto.getDispatcherId()).ifPresent(load::setDispatchers);
         loadRepository.save(load);
     }
 

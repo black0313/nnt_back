@@ -38,7 +38,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             if (myChatMember.getNewChatMember().getUser().getId().equals(getBotId())) {
                 // Bot guruhga qo'shilganida chat ID sini tekshirish
                 if (!dispatchersTeamRepository.existsByGroupId(chatId)) {
-                    sendMessageToGroup(chatId, "Guruh chat ID: " + chatId);
+                    sendMessageToGroup(chatId, "Guruh chat ID: " + chatId,"HTML");
 
                     // Chat ID ni saqlash uchun yangi DispatchersTeam ob'ektini yaratish
                     DispatchersTeam newGroup = new DispatchersTeam();
@@ -51,10 +51,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
     // Xabar yuborish uchun yordamchi metod
-    public void sendMessageToGroup(Long chatId, String messageText) {
+    public void sendMessageToGroup(Long chatId, String messageText,String format ) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(messageText);
+        message.setParseMode(format);
+        message.enableHtml(true);
 
         try {
             execute(message);

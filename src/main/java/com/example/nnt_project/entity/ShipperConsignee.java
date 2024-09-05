@@ -36,4 +36,6 @@ public class ShipperConsignee extends AbsEntity {
     private boolean shipper;
 
     private Boolean delete = false;
+
+    //todo lastStop
 }

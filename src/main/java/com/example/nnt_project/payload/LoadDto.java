@@ -20,6 +20,9 @@ public class LoadDto {
     private UUID dispatcherId;
     private UUID dispatcherTeamId;
     private UUID brokerId;
+    private double deadHead;
+    private double loadMile;
+    private double totalRide;
     private List<ShipperConsigneeDto> shipperConsigneeDtoList;
 
 }

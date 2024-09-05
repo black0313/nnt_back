@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -39,4 +36,12 @@ public class Load extends AbsEntity {
     private DispatchersTeam dispatchersTeam;
 
     private Boolean delete = false;
+
+    private double deadHead;
+
+    private double loadMile;
+
+    private double totalRide;
+
+    private double perMile;
 }

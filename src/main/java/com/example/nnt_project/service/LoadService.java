@@ -10,6 +10,7 @@ import com.example.nnt_project.payload.LoadGetDto;
 import com.example.nnt_project.payload.ShipperConsigneeDto;
 import com.example.nnt_project.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.internal.bytebuddy.TypeCache;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,54 +48,66 @@ public class LoadService {
 
         // load qo'shish
         Load load = loadMapper.toEntity(loadDto);
-        setLoad(loadDto, load);
+        double loadMile = loadDto.getLoadMile();
+        double deadHead = loadDto.getDeadHead();
+        double totalRide = loadDto.getTotalRide();
+        load.setLoadMile(loadMile);
+        load.setDeadHead(deadHead);
+        load.setTotalRide(totalRide);
 
+        load.setPerMile(totalRide / (loadMile + deadHead));
+
+        setLoad(loadDto, load);
+        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
 
         StringBuilder message =
                 new StringBuilder("\uD83D\uDE9A " + (load.getTruck() != null ? load.getTruck().getTruckNumber() : " ") + "\n" +
                         "\uD83D\uDD16 " + dispatchersTeam.getName() + "\n" +
                         "\uD83D\uDC68 " + (load.getDriver() != null ? load.getDriver().getDriverName() : " ") + "\n \n");
 
-
-        List<String> pickupAddresses = new ArrayList<>();
-        List<String> consigneeAddresses = new ArrayList<>();
-        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
         for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
             ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
             pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
             facilityRepository.findById(shipperConsigneeDto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
             shipperConsignee.setLoad(load);
             shipperConsigneeRepository.save(shipperConsignee);
+
+            String address = shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ";
+            String date = shipperConsignee.isShipper() ?
+                    (shipperConsignee.getPickDate() != null ? shipperConsignee.getPickDate().toString() : "") :
+                    (shipperConsignee.getDeliveryDate() != null ? shipperConsignee.getDeliveryDate().toString() : "");
+
             if (shipperConsignee.isShipper()) {
-                String pickupDate = shipperConsignee.getPickDate() != null ? shipperConsignee.getPickDate().toString() : "";
-                pickupAddresses.add("Pick up: \uD83C\uDFED \n " + (shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ") + "\n" +
-                        "Arrive: \n " + pickupDate + "\n");
-            } else {
-                String consigneeDate = shipperConsignee.getDeliveryDate() != null ? shipperConsignee.getDeliveryDate().toString() : "";
-                consigneeAddresses.add("\n Last Stop: \uD83C\uDFED \n " + (shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ") + "\n" +
-                        "Arrive: \n " + consigneeDate + "\n");
+                message.append("Pick up: \uD83C\uDFED \n")
+                        .append("<pre>").append(address).append("</pre>")
+                        .append("\nArrive: ")
+                        .append(date)
+                        .append("\n\n");
             }
         }
 
-        for (String pickupAddress : pickupAddresses) {
-            message.append(pickupAddress);
+        List<ShipperConsignee> all = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalseAndShipperFalseOrderByDeliveryDate(load.getId());
+        for (ShipperConsignee shipperConsignee : all) {
+            message.append("Last Stop: \uD83C\uDFED \n")
+                    .append("<pre>").append(shipperConsignee.getPickupAddress().getAddress()).append("</pre>")
+                    .append("\nArrive: ")
+                    .append(shipperConsignee.getPickDate())
+                    .append("\n\n");
         }
 
-        for (String consigneeAddress : consigneeAddresses) {
-            message.append(consigneeAddress);
-        }
-
-        String messageLast = "⚠\uFE0F-Traffic/Construction/Weather or other delays (photos or videos) -  should be updated in good time by drivers\n" +
+        String messageLast = "⚠\uFE0F-Traffic/Construction/Weather or other delays (photos or videos) - should be updated in good time by drivers\n" +
                 "⚠\uFE0F-Please Scale the load after pick up, to avoid axle overweight. Missing scale ticket - 200$ penalty fee.\n" +
                 "⚠\uFE0F-After hooking up the trailer, PTI should be done !!!\n";
+
         message.append(messageLast);
 
         if (dispatchersTeam.getGroupId() != null) {
-            myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(), message.toString());
+            myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(), message.toString(), "HTML");
         }
 
         return new ApiResponse("successfully created", true);
     }
+
 
     private void setLoad(LoadDto loadDto, Load load) {
         if (loadDto.getDriverId() != null)

@@ -27,7 +27,7 @@ public class AuthController {
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
         try {
             AuthenticationResponse response = service.authenticate(request);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new ApiResponse("success",true,response));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body(new ApiResponse("Authentication failed: Invalid credentials", false));
         } catch (Exception e) {

@@ -46,7 +46,7 @@ public class TelegramMessageBuilder {
                     .append("\n\n");
         }
 
-        if (shipperConsignee.getLastStop()) {
+        if (shipperConsignee.getLastStop() != null && shipperConsignee.getLastStop()) {
             message.append("Last Stop: \uD83C\uDFED \n")
                     .append("<pre>").append(address).append("</pre>")
                     .append("\nArrive: ")

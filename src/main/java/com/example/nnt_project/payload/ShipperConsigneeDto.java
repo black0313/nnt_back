@@ -20,4 +20,7 @@ public class ShipperConsigneeDto {
     private Double weight;
     private Double value;
     private boolean shipper;
+
 }
+
+

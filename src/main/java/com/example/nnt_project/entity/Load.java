@@ -44,4 +44,18 @@ public class Load extends AbsEntity {
     private double totalRide;
 
     private double perMile;
+
+    public void calculateRideMetrics(double loadMile, double deadHead, double totalRide) {
+        this.loadMile = loadMile;
+        this.deadHead = deadHead;
+        this.totalRide = totalRide;
+
+        // Umumiy marshrut va har kilometr uchun narxni hisoblash
+        double fullRide = loadMile + deadHead;
+        if (fullRide > 0) {
+            this.perMile = totalRide / fullRide;
+        } else {
+            this.perMile = 0;
+        }
+    }
 }

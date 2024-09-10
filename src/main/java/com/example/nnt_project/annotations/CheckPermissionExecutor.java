@@ -1,7 +1,7 @@
 package com.example.nnt_project.annotations;
 
-import com.example.nnt_project.exceptions.ForbiddenException;
 import com.example.nnt_project.user.User;
+import jakarta.ws.rs.ForbiddenException;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,6 +23,6 @@ public class CheckPermissionExecutor {
                 break;
             }
         }
-        if (!exist) throw new ForbiddenException(checkPermission.value(), "Forbidden");
+        if (!exist) throw new ForbiddenException();
     }
 }

@@ -8,17 +8,16 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Data
-@ControllerAdvice
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenException extends RuntimeException {
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
+public class UnauthorizedException extends RuntimeException {
 
     private String type;
-    private String massage;
+    private String message;
 
-    public ForbiddenException(String type, String massage) {
+    public UnauthorizedException(String type, String message) {
         this.type = type;
-        this.massage = massage;
+        this.message = message;
     }
 }

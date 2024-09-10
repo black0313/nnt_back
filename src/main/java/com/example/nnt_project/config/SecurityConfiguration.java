@@ -1,5 +1,6 @@
 package com.example.nnt_project.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,49 +30,28 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable) // CSRF himoyasini o'chirish
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS konfiguratsiyasi
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
-                        .requestMatchers("/api/trailers/**").permitAll()
-                        .requestMatchers("/api/files/**").permitAll()
-                        .requestMatchers("/api/facilities/**").permitAll()
-                        .requestMatchers("/api/drivers/**").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/brokers/**").permitAll()
-                        .requestMatchers("/api/dispatchers/**").permitAll()
-                        .requestMatchers("/api/auth/authenticate/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/trucks/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.POST, "/api/drivers/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/drivers/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/api/drivers/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/drivers/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.POST, "/api/trucks/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/trucks/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/trucks/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/api/manager/**").hasAnyRole("MANAGER")
-//                        .requestMatchers(HttpMethod.POST, "/api/manager/**").hasRole("MANAGER")
-//                        .requestMatchers(HttpMethod.PUT, "/api/manager/**").hasRole("MANAGER")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/manager/**").hasRole("MANAGER")
-//                        .requestMatchers(HttpMethod.GET, "/api/dispatcher/**").hasAnyRole("ADMIN", "DISPATCHER")
-//                        .requestMatchers(HttpMethod.POST, "/api/dispatcher/**").hasRole("DISPATCHER")
-//                        .requestMatchers(HttpMethod.PUT, "/api/dispatcher/**").hasRole("DISPATCHER")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/dispatcher/**").hasRole("DISPATCHER")
-//                        .requestMatchers(HttpMethod.GET, "/api/accountant/**").hasAnyRole("ADMIN", "ACCOUNTANT")
-//                        .requestMatchers(HttpMethod.POST, "/api/accountant/**").hasRole("ACCOUNTANT")
-//                        .requestMatchers(HttpMethod.PUT, "/api/accountant/**").hasRole("ACCOUNTANT")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/accountant/**").hasRole("ACCOUNTANT")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll() // Swagger uchun ruxsat
+                        .requestMatchers("/api/trailers/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/files/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/facilities/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/drivers/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/users/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/brokers/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/dispatchers/**").permitAll() // Open endpoints
+                        .requestMatchers("/api/auth/authenticate/**").permitAll() // Open endpoints
+                        .anyRequest().authenticated() // Qolgan so'rovlar uchun autentifikatsiya talab qilinadi
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAutFilter, UsernamePasswordAuthenticationFilter.class);
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Session yaratishni o'chirish
+                .authenticationProvider(authProvider) // Custom AuthenticationProvider
+                .addFilterBefore(jwtAutFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"); // 401 xato
+                });// JWT filter qo'shish
 
         return http.build();
     }
@@ -79,13 +59,13 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Ruxsat etilgan originlar
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Ruxsat etilgan metodlar
+        configuration.setAllowedHeaders(List.of("*")); // Ruxsat etilgan headerlar
+        configuration.setAllowCredentials(true); // Credentialsni qo'llab-quvvatlash
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // CORS konfiguratsiyasini qo'llash
         return source;
     }
 }

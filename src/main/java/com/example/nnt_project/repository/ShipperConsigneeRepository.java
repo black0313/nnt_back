@@ -8,7 +8,5 @@ import java.util.UUID;
 
 public interface ShipperConsigneeRepository  extends JpaRepository<ShipperConsignee, UUID> {
     List<ShipperConsignee> findAllByLoadIdAndDeleteFalse(UUID loadId);
-    List<ShipperConsignee> findAllByLoadIdAndDeleteFalseAndShipperFalseOrderByDeliveryDate(UUID loadId);
-    void deleteAllByLoadId(UUID loadId);
-    List<ShipperConsignee> findAllByDeleteFalse();
+    List<ShipperConsignee> findAllByLoadIdAndDeleteFalseAndShipperFalse(UUID loadId);
 }

@@ -1,6 +1,7 @@
 package com.example.nnt_project.service;
 
 import com.example.nnt_project.bot.MyTelegramBot;
+import com.example.nnt_project.builder.TelegramMessageBuilder;
 import com.example.nnt_project.entity.*;
 import com.example.nnt_project.mapper.LoadMapper;
 import com.example.nnt_project.mapper.ShipperConsigneeMapper;
@@ -9,14 +10,15 @@ import com.example.nnt_project.payload.LoadDto;
 import com.example.nnt_project.payload.LoadGetDto;
 import com.example.nnt_project.payload.ShipperConsigneeDto;
 import com.example.nnt_project.repository.*;
+import com.example.nnt_project.validator.LoadValidator;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.internal.bytebuddy.TypeCache;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,88 +28,136 @@ public class LoadService {
     private final LoadRepository loadRepository;
     private final LoadMapper loadMapper;
     private final ShipperConsigneeMapper shipperConsigneeMapper;
+    private final LoadValidator loadValidator;
+    private final TelegramMessageBuilder telegramMessageBuilder;
     private final ShipperConsigneeRepository shipperConsigneeRepository;
-    private final DispatchersTeamRepository dispatchersTeamRepository;
-    private final PickupAddressRepository pickupAddressRepository;
     private final DriverRepository driverRepository;
     private final BrokerRepository brokerRepository;
-    private final TrailersRepository trailersRepository;
     private final TruckRepository truckRepository;
-    private final FacilityRepository facilityRepository;
+    private final TrailersRepository trailersRepository;
     private final DispatchersRepository dispatchersRepository;
+    private final DispatchersTeamRepository dispatchersTeamRepository;
+    private final PickupAddressRepository pickupAddressRepository;
+    private final FacilityRepository facilityRepository;
 
+    // CREATE
     public ApiResponse create(LoadDto loadDto) {
+        // 1. Validate incoming data
+        loadValidator.validateLoadDto(loadDto);
 
-        Optional<DispatchersTeam> optionalDispatchersTeam =
-                dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId());
-
-        if (optionalDispatchersTeam.isEmpty())
-            return new ApiResponse("no dispatcher team found");
-
-        DispatchersTeam dispatchersTeam = optionalDispatchersTeam.get();
-
-        // load qo'shish
+        // 2. Map DTO to Entity and calculate ride metrics
         Load load = loadMapper.toEntity(loadDto);
-        double loadMile = loadDto.getLoadMile();
-        double deadHead = loadDto.getDeadHead();
-        double totalRide = loadDto.getTotalRide();
-        load.setLoadMile(loadMile);
-        load.setDeadHead(deadHead);
-        load.setTotalRide(totalRide);
+        load.calculateRideMetrics(loadDto.getLoadMile(), loadDto.getDeadHead(), loadDto.getTotalRide());
 
-        load.setPerMile(totalRide / (loadMile + deadHead));
+        // 3. Set related entities and save load
+        setLoadDetails(loadDto, load);
 
-        setLoad(loadDto, load);
-        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
+        // 4. Save shippers/consignees
+        List<ShipperConsignee> shipperConsigneeList = saveShippersConsignees(loadDto, load);
+        markLastStopForLoad(load.getId());
 
-        StringBuilder message =
-                new StringBuilder("\uD83D\uDE9A " + (load.getTruck() != null ? load.getTruck().getTruckNumber() : " ") + "\n" +
-                        "\uD83D\uDD16 " + dispatchersTeam.getName() + "\n" +
-                        "\uD83D\uDC68 " + (load.getDriver() != null ? load.getDriver().getDriverName() : " ") + "\n \n");
+        // 5. Build and send Telegram message
+        String message = telegramMessageBuilder.buildMessage(load, shipperConsigneeList);
+        myTelegramBot.sendMessageToGroup(load.getDispatchersTeam().getGroupId(), message, "HTML");
 
-        for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
-            ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
-            pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
-            facilityRepository.findById(shipperConsigneeDto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
-            shipperConsignee.setLoad(load);
-            shipperConsigneeRepository.save(shipperConsignee);
-
-            String address = shipperConsignee.getPickupAddress() != null ? shipperConsignee.getPickupAddress().getAddress() : " ";
-            String date = shipperConsignee.isShipper() ?
-                    (shipperConsignee.getPickDate() != null ? shipperConsignee.getPickDate().toString() : "") :
-                    (shipperConsignee.getDeliveryDate() != null ? shipperConsignee.getDeliveryDate().toString() : "");
-
-            if (shipperConsignee.isShipper()) {
-                message.append("Pick up: \uD83C\uDFED \n")
-                        .append("<pre>").append(address).append("</pre>")
-                        .append("\nArrive: ")
-                        .append(date)
-                        .append("\n\n");
-            }
-        }
-
-        List<ShipperConsignee> all = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalseAndShipperFalseOrderByDeliveryDate(load.getId());
-        for (ShipperConsignee shipperConsignee : all) {
-            message.append("Last Stop: \uD83C\uDFED \n")
-                    .append("<pre>").append(shipperConsignee.getPickupAddress().getAddress()).append("</pre>")
-                    .append("\nArrive: ")
-                    .append(shipperConsignee.getPickDate())
-                    .append("\n\n");
-        }
-
-        String messageLast = "⚠\uFE0F-Traffic/Construction/Weather or other delays (photos or videos) - should be updated in good time by drivers\n" +
-                "⚠\uFE0F-Please Scale the load after pick up, to avoid axle overweight. Missing scale ticket - 200$ penalty fee.\n" +
-                "⚠\uFE0F-After hooking up the trailer, PTI should be done !!!\n";
-
-        message.append(messageLast);
-
-        if (dispatchersTeam.getGroupId() != null) {
-            myTelegramBot.sendMessageToGroup(dispatchersTeam.getGroupId(), message.toString(), "HTML");
-        }
-
-        return new ApiResponse("successfully created", true);
+        return new ApiResponse("Successfully created", true);
     }
 
+    // UPDATE
+    public ApiResponse update(UUID id, LoadDto loadDto) {
+        // 1. Find existing load or throw exception if not found
+        Load load = loadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Load not found"));
+
+        // 2. Update load fields
+        setLoad(loadDto, load);
+        setLoadDetails(loadDto, load);
+        saveShippersConsignees(loadDto, load);
+
+        return new ApiResponse("Successfully updated", true);
+    }
+
+    // GET ALL
+    public ApiResponse getAll() {
+        // 1. Fetch all non-deleted loads
+        List<Load> loads = loadRepository.findAllByDeleteFalse();
+        if (loads.isEmpty()) {
+            return new ApiResponse("No loads found", false);
+        }
+
+        // 2. Map each load to its corresponding DTO with shippers/consignees
+        List<LoadGetDto> loadDtos = loads.stream()
+                .map(load -> loadMapper.toGetDto(load, shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(load.getId())))
+                .collect(Collectors.toList());
+
+        return new ApiResponse("Loads found", true, loadDtos);
+    }
+
+    // GET BY ID
+    public ApiResponse getById(UUID id) {
+        // 1. Find load by ID or throw exception if not found
+        Load load = loadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Load not found"));
+
+        // 2. Fetch related shippers/consignees
+        List<ShipperConsignee> shipperConsignees = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(id);
+
+        // 3. Convert to DTO and return
+        LoadGetDto loadDto = loadMapper.toGetDto(load, shipperConsignees);
+        return new ApiResponse("Load found", true, loadDto);
+    }
+
+    // DELETE
+    public ApiResponse delete(UUID id) {
+        // 1. Find load by ID or throw exception if not found
+        Load load = loadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Load not found"));
+
+        // 2. Mark load as deleted
+        load.setDelete(true);
+        loadRepository.save(load);
+
+        return new ApiResponse("Successfully deleted", true);
+    }
+
+    // Helper methods
+
+    // Set related entities (dispatchers team, driver, broker, truck) for the load
+    private void setLoadDetails(LoadDto loadDto, Load load) {
+        loadValidator.setLoadEntities(load, loadDto);
+        loadRepository.save(load);
+    }
+
+    // Save shippers/consignees related to the load
+    private List<ShipperConsignee> saveShippersConsignees(LoadDto loadDto, Load load) {
+        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
+        List<ShipperConsignee> shipperConsignees = new ArrayList<>();
+        dtoList.forEach(dto -> {
+            ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(dto);
+            pickupAddressRepository.findById(dto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
+            facilityRepository.findById(dto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
+            shipperConsignee.setLoad(load); // Relate to the current load
+            shipperConsignees.add(shipperConsigneeRepository.save(shipperConsignee));
+        });
+        return shipperConsignees;
+    }
+
+
+
+    public void markLastStopForLoad(UUID loadId) {
+        // 1. Load ID bo'yicha barcha ShipperConsignee ob'ektlarini olish
+        List<ShipperConsignee> consigneeList = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalseAndShipperFalse(loadId);
+
+        // 2. Eng oxirgi deliveryDate sanani topish
+        Optional<ShipperConsignee> latestConsigneeOpt = consigneeList.stream()
+                .max((sc1, sc2) -> sc1.getDeliveryDate().compareTo(sc2.getDeliveryDate()));
+
+        // 3. Agar eng oxirgi ob'ekt topilgan bo'lsa, lastStop maydonini true qilish
+        latestConsigneeOpt.ifPresent(latestConsignee -> {
+            latestConsignee.setLastStop(true);
+            shipperConsigneeRepository.save(latestConsignee);
+        });
+    }
 
     private void setLoad(LoadDto loadDto, Load load) {
         if (loadDto.getDriverId() != null)
@@ -127,69 +177,5 @@ public class LoadService {
 
         dispatchersTeamRepository.findById(loadDto.getDispatcherTeamId()).ifPresent(load::setDispatchersTeam);
         loadRepository.save(load);
-    }
-
-
-    public ApiResponse getAll() {
-        List<Load> all = loadRepository.findAllByDeleteFalse();
-        if (all.isEmpty())
-            return new ApiResponse("not found", false);
-
-        List<LoadGetDto> loadDtoList = new ArrayList<>();
-        for (Load load : all) {
-            LoadGetDto loadGetDto = new LoadGetDto();
-            loadGetDto.setLoad(load);
-            loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(load.getId()));
-            loadDtoList.add(loadGetDto);
-        }
-
-        return new ApiResponse("found", true, loadDtoList);
-    }
-
-    public ApiResponse getById(UUID id) {
-        Optional<Load> optionalLoad = loadRepository.findById(id);
-        if (optionalLoad.isEmpty())
-            return new ApiResponse("not found");
-        LoadGetDto loadGetDto = new LoadGetDto();
-        loadGetDto.setLoad(optionalLoad.get());
-        loadGetDto.setShipperConsignees(shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(optionalLoad.get().getId()));
-        return new ApiResponse("found", true, loadGetDto);
-    }
-
-    public ApiResponse delete(UUID id) {
-        Optional<Load> optionalLoad = loadRepository.findById(id);
-        if (optionalLoad.isEmpty())
-            return new ApiResponse("not found");
-
-        Load load = optionalLoad.get();
-        load.setDelete(true);
-        loadRepository.save(load);
-
-        for (ShipperConsignee shipperConsignee : shipperConsigneeRepository.findAllByDeleteFalse()) {
-            shipperConsignee.setDelete(true);
-            shipperConsigneeRepository.save(shipperConsignee);
-        }
-
-        return new ApiResponse("successfully deleted", true);
-    }
-
-    public ApiResponse update(UUID id, LoadDto loadDto) {
-        Optional<Load> optionalLoad = loadRepository.findById(id);
-        if (optionalLoad.isEmpty())
-            return new ApiResponse("not found");
-
-        Load load = optionalLoad.get();
-        setLoad(loadDto, load);
-
-        List<ShipperConsigneeDto> dtoList = loadDto.getShipperConsigneeDtoList();
-        for (ShipperConsigneeDto shipperConsigneeDto : dtoList) {
-            ShipperConsignee shipperConsignee = shipperConsigneeMapper.toEntity(shipperConsigneeDto);
-            pickupAddressRepository.findById(shipperConsigneeDto.getAddressId()).ifPresent(shipperConsignee::setPickupAddress);
-            facilityRepository.findById(shipperConsigneeDto.getFacilityId()).ifPresent(shipperConsignee::setFacility);
-            shipperConsignee.setLoad(load);
-            shipperConsigneeRepository.save(shipperConsignee);
-        }
-
-        return new ApiResponse("successfully updated", true);
     }
 }

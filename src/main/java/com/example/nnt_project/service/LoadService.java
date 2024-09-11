@@ -100,7 +100,7 @@ public class LoadService {
                 .orElseThrow(() -> new IllegalArgumentException("Load not found"));
 
         // 2. Fetch related shippers/consignees
-        List<ShipperConsignee> shipperConsignees = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(id);
+        List<ShipperConsignee> shipperConsignees = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(load.getId());
 
         // 3. Convert to DTO and return
         LoadGetDto loadDto = loadMapper.toGetDto(load, shipperConsignees);
@@ -114,6 +114,12 @@ public class LoadService {
                 .orElseThrow(() -> new IllegalArgumentException("Load not found"));
 
         // 2. Mark load as deleted
+        List<ShipperConsignee> all = shipperConsigneeRepository.findAllByLoadIdAndDeleteFalse(load.getId());
+        for (ShipperConsignee shipperConsignee : all) {
+            shipperConsignee.setDelete(true);
+        }
+        shipperConsigneeRepository.saveAll(all);
+
         load.setDelete(true);
         loadRepository.save(load);
 

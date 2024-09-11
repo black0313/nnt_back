@@ -31,7 +31,7 @@ public class TelegramMessageBuilder {
 
 
         // Append any other information
-        message.append(buildLastStopInfo(load));
+        message.append(buildLastStopInfo());
 
         return message.toString();
     }
@@ -40,6 +40,12 @@ public class TelegramMessageBuilder {
         // Shipper va consignee ma'lumotlarini formatlash
         if (shipperConsignee.getLastStop() == null && shipperConsignee.isShipper()) {
             message.append("Pick up: \uD83C\uDFED \n")
+                    .append("<pre>").append(address).append("</pre>")
+                    .append("\nArrive: ")
+                    .append(date)
+                    .append("\n\n");
+        } else if (shipperConsignee.getLastStop() == null) {
+            message.append("To stop: \uD83C\uDFED \n")
                     .append("<pre>").append(address).append("</pre>")
                     .append("\nArrive: ")
                     .append(date)
@@ -56,7 +62,7 @@ public class TelegramMessageBuilder {
 
     }
 
-    private String buildLastStopInfo(Load load) {
+    private String buildLastStopInfo() {
         // Yangi xabar qismini qo'shish
         return "⚠\uFE0F-Traffic/Construction/Weather or other delays (photos or videos) - should be updated in good time by drivers\n" +
                 "⚠\uFE0F-Please Scale the load after pick up, to avoid axle overweight. Missing scale ticket - 200$ penalty fee.\n" +
